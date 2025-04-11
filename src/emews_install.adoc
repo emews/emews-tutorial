@@ -13,7 +13,7 @@ The binary install is a conda environment, and requires a conda installation as 
 https://www.anaconda.com/download[anaconda], or https://docs.anaconda.com/free/miniconda/miniconda-install[miniconda] if
 you do not have an existing conda installation. For the differences between the three with respect to Anaconda's Terms of Service and remaining in compliance with those terms, see https://www.anaconda.com/blog/is-conda-free[is conda free]. More information on conda environments can found https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html[here].
 
-See <<_quickstart>> for how to download the install scripts and install the environment with the `install_emews.sh` script. The remainder
+See <<quickstart>> for how to download the install scripts and install the environment with the `install_emews.sh` script. The remainder
 of this section will walk through the relevant parts of the script in greater detail. 
 
 ==== The Install Script
