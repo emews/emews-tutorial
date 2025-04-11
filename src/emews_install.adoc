@@ -147,7 +147,7 @@ and an MPI implementation (e.g., `mpich`).
 
 EMEWS supports any compiler toolset and MPI implementation.  The Swift/T runtime is used to link together many of the workflow components for EMEWS, but not the database.  It is important to maintain consistency with the C compiler across all the tools linked together under Swift/T, which is automatically done under a package manager.  A primary purpose of package managers is to maintain compiler/binary compatibility across packages.  If you install some of these tools from the package manager, and manually compile some with the compiler under the same package manager, you will be fine.
 
-A complete description of the Swift/T installation may be found at the https://swift-lang.github.io/swift-t/guide.html#_installation[Swift/T Guide].
+A complete description of the Swift/T installation may be found at the https://swift-lang.github.io/swift-t/guide.html#_installation[Swift/T Guide]. Note that for use with EMEWS, you will need to install the Python and R-enabled Swift/T.
 
 You must also install Postgres, but this does not have to be linked to Swift/T.  The instructions for this are under the https://www.postgresql.org/docs/current/admin.html[Postgres Server Administration Docs].
 

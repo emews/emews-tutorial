@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <meta name="author" content="Version 2.0 Dec 16 2024">
 <title>EMEWS Tutorial</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -194,7 +194,8 @@ body.toc2.toc-right{padding-left:0;padding-right:20em}}
 #content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
 details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
 details{margin-left:1.25rem}
-details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;-webkit-tap-highlight-color:transparent}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
 details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
 details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
 details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
@@ -236,9 +237,8 @@ pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
 table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
 table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
 table.linenotable td.code{padding-left:.75em}
-table.linenotable td.linenos{border-right:0px solid;opacity:.35;padding-right:.5em}
-pre.pygments .lineno{border-right:0px solid;opacity:1;display:inline-block;margin-right:.75em}
-pre.pygments .lineno::before{content:"";margin-right:-.125em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:0px solid;opacity:1;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
 .quoteblock{margin:0 1em 1.25em 1.5em;display:table}
 .quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
 .quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
@@ -275,7 +275,7 @@ table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-c
 table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
 table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
 table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
-table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
 th.halign-left,td.halign-left{text-align:left}
 th.halign-right,td.halign-right{text-align:right}
 th.halign-center,td.halign-center{text-align:center}
@@ -291,10 +291,11 @@ ol{margin-left:1.75em}
 ul li ol{margin-left:1.5em}
 dl dd{margin-left:1.125em}
 dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
-ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
 ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
 ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
 ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
 ul.checklist>li>p:first-child{margin-left:-1em}
 ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
 ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
@@ -337,8 +338,6 @@ sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
 #footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
 #footnotes .footnote:last-of-type{margin-bottom:0}
 #content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
-.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
-.gist .file-data>table td.line-data{width:99%}
 div.unbreakable{page-break-inside:avoid}
 .big{font-size:larger}
 .small{font-size:smaller}
@@ -439,11 +438,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f8f8f8; }
 pre.pygments .tok-c { color: #408080; font-style: italic } /* Comment */
@@ -1934,7 +1928,7 @@ emews creator <a href="#eqsql_top">eqsql</a> template, and that should be read b
 </td>
 <td class="content">
 <div class="paragraph">
-<p>This use case assumes that you have already installed EMEWS. See the <a href="#quickstart">Quickstart section</a> for how to do this with a simple binary install on your local setup. For non-binary installations or for installing on HPC resources, see the <a href="#emews_install">EMEWS Install section</a>. A Python (and optionally R) enabled Swift/T installation will be required. Additionally, the ME code requires 3 additional packages <code>numpy</code>, <code>scipy</code>, and <code>scikit-learn</code>. These can
+<p>This use case assumes that you have already installed EMEWS. See the <a href="#quickstart">Quickstart section</a> for how to do this with a simple binary install on your local setup. For non-binary installations or for installing on HPC resources, see the <a href="#emews_install">EMEWS Install section</a>. A Python (and optionally R) enabled Swift/T installation will be required. The ME code also requires 3 additional Python packages <code>numpy</code>, <code>scipy</code>, and <code>scikit-learn</code>. These can
 be installed with <code>conda</code> if using the local binary install: <code>conda install numpy scipy scikit-learn</code>, or with <code>pip</code> if you are not using a conda environment: <code>pip install numpy scipy scikit-learn</code>.</p>
 </div>
 </td>
@@ -1997,7 +1991,7 @@ $ python3 me.py test_ackley me_cfg.yaml</code></pre>
 </div>
 <div class="paragraph">
 <p>Running the workflow will create an experiment directory whose name
-consists of th experiment id followed by a timestamp. The workflow runs
+consists of the experiment id followed by a timestamp. The workflow runs
 within this directory.</p>
 </div>
 </div>
@@ -2935,7 +2929,7 @@ and an MPI implementation (e.g., <code>mpich</code>).</p>
 <p>EMEWS supports any compiler toolset and MPI implementation.  The Swift/T runtime is used to link together many of the workflow components for EMEWS, but not the database.  It is important to maintain consistency with the C compiler across all the tools linked together under Swift/T, which is automatically done under a package manager.  A primary purpose of package managers is to maintain compiler/binary compatibility across packages.  If you install some of these tools from the package manager, and manually compile some with the compiler under the same package manager, you will be fine.</p>
 </div>
 <div class="paragraph">
-<p>A complete description of the Swift/T installation may be found at the <a href="https://swift-lang.github.io/swift-t/guide.html#_installation">Swift/T Guide</a>.</p>
+<p>A complete description of the Swift/T installation may be found at the <a href="https://swift-lang.github.io/swift-t/guide.html#_installation">Swift/T Guide</a>. Note that for use with EMEWS, you will need to install the Python and R-enabled Swift/T.</p>
 </div>
 <div class="paragraph">
 <p>You must also install Postgres, but this does not have to be linked to Swift/T.  The instructions for this are under the <a href="https://www.postgresql.org/docs/current/admin.html">Postgres Server Administration Docs</a>.</p>
@@ -5959,7 +5953,7 @@ and/or ATLAS numerical libraries underneath.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-21 09:06:00 -0500
+Last updated 2025-01-10 12:08:55 -0600
 </div>
 </div>
 </body>
