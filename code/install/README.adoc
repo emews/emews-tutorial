@@ -50,8 +50,19 @@ Cf. <<Reticulate>>
 
 === Postgres Version
 
+==== linux-aarch64
+
 Postgres has been pinned to 14.12 as later versions on conda-forge crash
 on linux-aarch64
+
+==== GCE
+
+Must set `LD_LIBRARY_PATH` to `$CONDA_PREFIX/x86_64-conda-linux-gnu/lib`
+or you will get problems with emewscreator/initdb like:
+
+----
+ValueError: EQ/SQL create database failed:/tmp/woz/Miniconda-311-X/bin/postgres: /lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.30' not found
+----
 
 === GCC version
 

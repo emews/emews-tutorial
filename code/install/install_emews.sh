@@ -207,6 +207,14 @@ start_step "$TEXT"
 pip install emewscreator >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
+if [[ $AUTO_TEST == "Jenkins" ]]
+then
+    # See README
+    COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
+    export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
+    echo "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+fi
+
 TEXT="Initializing EMEWS Database"
 start_step "$TEXT"
 emewscreator init_db -d $2 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
