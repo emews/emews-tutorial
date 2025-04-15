@@ -1,4 +1,5 @@
 #!/bin/bash
+# Postpone 'set -eu' for conda activate below
 
 # TEST SWIFT-T
 # Test Swift/T under GitHub Actions or Jenkins
@@ -72,6 +73,12 @@ FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
 
 echo "..."
 echo "test-swift-t.sh: STOP: OK"
+
+if (( ${#GITHUB_ACTION} > 0))
+then
+    # For inspect-tests.sh
+    echo "TESTS SUCCESS." > test.log
+fi
 
 # Local Variables:
 # sh-basic-offset: 4

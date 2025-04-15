@@ -38,4 +38,7 @@ jobs:
           gh/inspect-install.sh
       - name: Test Swift/T
         run: |
-          tests/test-swift-t.sh ${{ matrix.python-version }}
+          gh/check tests/test-swift-t.sh ${{ matrix.python-version }}
+      - name: Inspect tests
+        run: |
+          gh/inspect-tests.sh
