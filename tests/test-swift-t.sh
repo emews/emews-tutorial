@@ -44,6 +44,14 @@ then
     exit 1
 fi
 
+if [[ $AUTO_TEST == "Jenkins" ]]
+then
+    # See code/install/README.  Sync this with install_emews.sh
+    COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
+    export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
+    echo "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+fi
+
 set -eu
 
 PYTHON_EXE=$(which python)
