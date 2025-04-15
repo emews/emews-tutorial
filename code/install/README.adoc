@@ -74,6 +74,8 @@ or you will get problems with emewscreator/initdb like:
 ValueError: EQ/SQL create database failed:/tmp/woz/Miniconda-311-X/bin/postgres: /lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.30' not found
 ----
 
+This is needed for Postgres and Swift/T itself, so it is used in `install_emews.sh` and `test-swift-t.sh`.
+
 === GCC version
 
 On GCE Jenkins, `install_emews.sh` must upgrade GCC with the command:

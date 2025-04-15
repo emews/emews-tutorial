@@ -209,7 +209,7 @@ end_step "$TEXT"
 
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
-    # See README
+    # See README.  Sync this with test-swift-t.sh
     COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
     export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
     echo "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
