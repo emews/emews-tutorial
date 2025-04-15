@@ -23,6 +23,12 @@ then
     # Otherwise, we are on GitHub, and GitHub provides python, conda
 fi
 
+if (( ${#GITHUB_ACTION} > 0))
+then
+    # Placeholder with no content:
+    echo > test.log
+fi
+
 ENV_NAME=emews-py${PY_VERSION}
 
 CONDA_EXE=$(which conda)
