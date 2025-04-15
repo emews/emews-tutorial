@@ -256,6 +256,9 @@ echo "# To deactivate an active environment, use"
 echo "#"
 echo "#     $ conda deactivate"
 
+echo "INSTALL SUCCESS." >> "$EMEWS_INSTALL_LOG"
+
+
 # Local Variables:
 # sh-basic-offset: 4
 # End:

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# GH CHECK
+# Run command, always return success for GitHub action!
+# Allows us to capture artifacts and test for success later
+
+echo "CHECK: ${*}"
+
+# Adds gh/ to PATH to shorten commands
+
+if [ ! -d gh ]
+then
+  echo "CHECK: MISCONFIGURATION!"
+  exit 1
+fi
+
+PATH=$PWD/gh:$PATH
+
+# Run the arguments here!
+if ${*}
+then
+  echo "CHECK: OK."
+else
+  echo "CHECK: FAILED: ${*}"
+fi
