@@ -29,6 +29,8 @@ This script is tested weekly at:
 
 https://jenkins.cels.anl.gov/user/woz/my-views/view/EMEWS/job/EMEWS-Install
 
+NOTE: This configuration sets `GITHUB_PAT` in the Jenkins Pipeline Script.
+
 == Modules
 
 ===  R packages
@@ -75,7 +77,7 @@ conda upgrade -y -c conda-forge gcc
 or we will get an error like this from reticulate and GCC 11:
 
 ----
-* installing *source* package 'reticulateâ€™ ...
+* installing *source* package 'reticulate' ...
 ** package 'reticulate' successfully unpacked and MD5 sums checked
 ** using staged installation
 ** libs
@@ -109,4 +111,4 @@ This is handled by `install_pkgs.R`, see <<R packages>>.
 
 == Developer details
 
-When running under Jenkins, we simplify the output for compatibility with the web browser interface, and do not use emojis or carriage returns.
+When running under automated testing (GitHub or Jenkins), i.e. `AUTO_TEST`, we simplify the output for compatibility with the web browser interface, and do not use emojis or carriage returns.
