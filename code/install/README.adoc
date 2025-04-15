@@ -25,11 +25,19 @@ Use `conda activate` to activate the installed environment.
 
 == Testing
 
+=== Jenkins
+
 This script is tested weekly at:
 
 https://jenkins.cels.anl.gov/user/woz/my-views/view/EMEWS/job/EMEWS-Install
 
-NOTE: This configuration sets `GITHUB_PAT` in the Jenkins Pipeline Script.
+NOTE: This configuration sets `GITHUB_PAT=ghp_ABC123...` in the Jenkins Pipeline Script.
+
+=== GitHub Actions
+
+This script is tested by a GitHub action on push.
+
+NOTE: This configuration sets `GITHUB_PAT=secrets.GH_PAT_WOZ` via `~/.Renviron` in the YAML scripts.
 
 == Modules
 
