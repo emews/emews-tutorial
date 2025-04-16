@@ -118,7 +118,8 @@ done
 
 if [ "$#" -ne 2 ]; then
     help
-    exit
+    # Invalid argument count is an error:
+    exit 1
 fi
 
 PY_VERSION=''
