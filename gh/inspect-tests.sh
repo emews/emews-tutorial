@@ -15,11 +15,13 @@ INSTALL_LOG=code/install/emews_install.log
 if ! [ -f $TEST_LOG ]
 then
   msg "NO TEST LOG"
+  echo
   exit 1
 fi
 
 if ! grep -q "TESTS SUCCESS." $TEST_LOG
 then
+  echo
   msg "TESTS FAILED"
   echo
   echo "TEST LOG: $TEST_LOG"
@@ -33,7 +35,10 @@ then
   cat $INSTALL_LOG
   echo
   echo "INSTALL LOG END: $INSTALL_LOG"
+  echo
   exit 1
 fi
 
+echo
 msg "INSTALL OK."
+echo

@@ -14,6 +14,7 @@ LOG=code/install/emews_install.log
 if ! [ -f $LOG ]
 then
   msg "NO LOG"
+  echo
   exit 1
 fi
 
@@ -26,6 +27,7 @@ then
   cat $LOG
   echo
   echo "LOG END: $LOG"
+  echo
   exit 1
 fi
 
