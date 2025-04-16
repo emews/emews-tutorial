@@ -250,7 +250,16 @@ echo "# To deactivate an active environment, use"
 echo "#"
 echo "#     $ conda deactivate"
 
-echo "INSTALL SUCCESS." >> "$EMEWS_INSTALL_LOG"
+(
+    # Quick probe of new installation
+    echo ACTIVATE $ENV_NAME
+    conda activate $ENV_NAME
+    set -x
+    echo CONDA_PREFIX=$CONDA_PREFIX
+    ls $CONDA_PREFIX/lib
+) >> "$EMEWS_INSTALL_LOG"
+
+echo "\nINSTALL SUCCESS." >> "$EMEWS_INSTALL_LOG"
 
 
 # Local Variables:
