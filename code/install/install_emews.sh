@@ -213,14 +213,21 @@ conda-list()
     } >> "$EMEWS_INSTALL_LOG"
 }
 
-conda-list
+conda-list 0
+
+TEXT="Installing R"
+start_step "$TEXT"
+conda install -y -c conda-forge "r==4.4" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+end_step "$TEXT"
+
+conda-list 1
 
 TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
 conda install -y -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-conda-list
+conda-list 2
 
 # if [[ $OS != "Darwin" ]]
 if [[ $AUTO_TEST == "Jenkins" ]]
@@ -238,7 +245,7 @@ start_step "$TEXT"
 conda install -y -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-conda-list
+conda-list 3
 
 TEXT="Installing EMEWS Creator"
 start_step "$TEXT"
