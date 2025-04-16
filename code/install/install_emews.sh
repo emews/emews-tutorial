@@ -22,9 +22,17 @@ function start_step {
     then
         # Normal shell run
         echo -en "[ ] $1 "
-    else
-        # Auto test run
+    elif [[ $AUTO_TEST == "Jenkins" ]]
+    then
         echo -e  "[ ] $1 "
+    elif [[ $AUTO_TEST == "GitHub" ]]
+    then
+        # Duplicate output to visible output and log
+        echo -e "[ ] $1 "
+        echo -e "[ ] $1 " >> "$EMEWS_INSTALL_LOG"
+    else
+        echo "Invalid AUTO_TEST=$AUTO_TEST"
+        exit 1
     fi
 }
 
@@ -33,9 +41,17 @@ function end_step {
     then
         # Normal shell run - overwrite last line and show check mark
         echo -e "\r[\xE2\x9C\x94] $1 "
-    else
-        # Auto test run
+    elif [[ $AUTO_TEST == "Jenkins" ]]
+    then
         echo -e "[X] $1 "
+    elif [[ $AUTO_TEST == "GitHub" ]]
+    then
+        # Duplicate output to visible output and log
+        echo -e "[X] $1 "
+        echo -e "[X] $1 " >> "$EMEWS_INSTALL_LOG"
+    else
+        echo "Invalid AUTO_TEST=$AUTO_TEST"
+        exit 1
     fi
 }
 
@@ -142,7 +158,12 @@ EMEWS_INSTALL_LOG="$THIS/emews_install.log"
 OS=$( uname -o )
 
 echo "Starting EMEWS stack installation"
-echo "See ${THIS}/emews_install.log for detailed output."
+echo "See detailed output in: ${THIS}/emews_install.log"
+if [[ -f ${THIS}/emews_install.log ]]
+then
+    echo "Resetting log..."
+    echo > ${THIS}/emews_install.log
+fi
 echo
 
 echo "Using conda bin: $CONDA_BIN_DIR"
