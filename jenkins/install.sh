@@ -45,10 +45,13 @@ if [[ -d $DB ]] {
   log "Removing existing DB=$DB"
   rm -rf $DB
 }
+
 (
+  # Install it!
   set -x
   which python conda
   $EMEWS/code/install/install_emews.sh $PV_DOT $DB
 )
+
 log "INSTALL SUCCESS"
 print
