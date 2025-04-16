@@ -209,6 +209,9 @@ end_step "$TEXT"
 
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
+
+FIX
+
     # See README.  Sync this with test-swift-t.sh
     COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
     export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
@@ -252,14 +255,20 @@ echo "#     $ conda deactivate"
 
 (
     # Quick probe of new installation
-    echo ACTIVATE $ENV_NAME
+    # Merge stderr to stdout:
+    exec 2>&1
+    echo PROBE-ACTIVATE $ENV_NAME
     conda activate $ENV_NAME
     set -x
     echo CONDA_PREFIX=$CONDA_PREFIX
     ls $CONDA_PREFIX/lib
+    ldd $CONDA_PREFIX/lib/libeqr.so
 ) >> "$EMEWS_INSTALL_LOG"
 
-echo "\nINSTALL SUCCESS." >> "$EMEWS_INSTALL_LOG"
+{
+    echo
+    echo "INSTALL SUCCESS."
+} >> "$EMEWS_INSTALL_LOG"
 
 
 # Local Variables:
