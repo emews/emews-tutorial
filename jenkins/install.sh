@@ -50,7 +50,7 @@ if [[ -d $DB ]] {
   # Install it!
   set -x
   which python conda
-  $EMEWS/code/install/install_emews.sh $PV_DOT $DB
+  $EMEWS/code/install/install_emews.sh -t $PV_DOT $DB
 )
 
 log "INSTALL SUCCESS"
