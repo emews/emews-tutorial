@@ -199,7 +199,8 @@ conda-list()
 {
     {
         echo
-        echo conda list ${*}
+        echo "conda-list:" ${*}
+        echo
         conda list 2>&1
         echo
     } >> "$EMEWS_INSTALL_LOG"
