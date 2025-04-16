@@ -91,6 +91,7 @@ help() {
    echo
    echo "Arguments:"
    echo "  -h                     display this help and exit"
+   echo "  -t                     run additional short tests"
    echo "  python-version         python version to use ($V_STRING)"
    echo "  database-directory     EQ/SQL Database installation directory"
    echo
@@ -98,11 +99,17 @@ help() {
    echo "  install_emews.sh 3.11 ~/Documents/db/eqsql_db"
 }
 
-while getopts ":h" option; do
+# Default: Tests off
+# It is good to be able to run short tests
+# before the long install_pkgs.R step
+RUN_TESTS=0
+
+while getopts ":ht" option; do
    case $option in
       h) # display Help
          help
          exit;;
+      t) RUN_TESTS=1 ;;
       \?) # incorrect option
          help
          exit;;
@@ -195,7 +202,8 @@ then
     echo "conda:   " $(which conda)
 fi
 
-conda-list()
+function conda-list
+# Debug conda state during installations
 {
     {
         echo
@@ -215,6 +223,15 @@ end_step "$TEXT"
 
 conda-list 1
 
+if (( RUN_TESTS ))
+then
+    (
+        set -x
+        which R
+        R --version
+    )
+fi
+
 TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
 conda install -y -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
@@ -230,6 +247,15 @@ source $CONDA_BIN_DIR/activate $ENV_NAME
 end_step "$TEXT"
 
 conda-list 3
+
+if (( RUN_TESTS ))
+then
+    (
+        set -x
+        swift-t -v
+        swift-t -E 'trace(42);'
+    )
+fi
 
 # if [[ $OS != "Darwin" ]]
 if [[ $AUTO_TEST == "Jenkins" ]]
