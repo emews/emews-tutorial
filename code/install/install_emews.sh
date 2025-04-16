@@ -206,8 +206,10 @@ end_step "$TEXT"
 conda-list()
 {
     {
-        echo conda list
+        echo
+        echo conda list ${*}
         conda list 2>&1
+        echo
     } >> "$EMEWS_INSTALL_LOG"
 }
 
