@@ -195,14 +195,6 @@ then
     echo "conda:   " $(which conda)
 fi
 
-# !! conda activate $ENV_NAME doesn't work within the script
-TEXT="Installing swift-t conda package"
-start_step "$TEXT"
-conda install -y -c conda-forge -c swift-t swift-t-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-conda deactivate
-source $CONDA_BIN_DIR/activate $ENV_NAME
-end_step "$TEXT"
-
 conda-list()
 {
     {
@@ -229,6 +221,15 @@ end_step "$TEXT"
 
 conda-list 2
 
+TEXT="Installing swift-t conda package"
+start_step "$TEXT"
+conda install -y -c conda-forge -c swift-t "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda deactivate
+source $CONDA_BIN_DIR/activate $ENV_NAME
+end_step "$TEXT"
+
+conda-list 3
+
 # if [[ $OS != "Darwin" ]]
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
@@ -240,12 +241,14 @@ then
     end_step "$TEXT"
 fi
 
+conda-list 4
+
 TEXT="Installing PostgreSQL"
 start_step "$TEXT"
 conda install -y -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-conda-list 3
+conda-list 5
 
 TEXT="Installing EMEWS Creator"
 start_step "$TEXT"
