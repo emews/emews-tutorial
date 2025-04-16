@@ -48,6 +48,7 @@ install.packages(pkg_file, repos=NULL, type="source")
 cat("LOAD:    ", pkg, "\n")
 library(package=pkg, character.only=TRUE)
 
+# Installs EQ-SQL via the GitHub API. See README about GitHub PAT
 library(remotes)
 remotes::install_github('emews/EQ-SQL/R/EQ.SQL')
 

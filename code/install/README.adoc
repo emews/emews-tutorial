@@ -56,6 +56,13 @@ $ Rscript install_pkgs.R
 
 Cf. <<Reticulate>>
 
+=== Install via GitHub
+
+When run under GitHub Actions, `install_github()` requires a GitHub Personal Access Token.
+In this case, we set a secret for `GITHUB_PAT`.  See the Testing section.
+
+More info: https://snyk.io/blog/how-to-use-github-actions-environment-variables
+
 == Known complexities
 
 === Postgres Version
