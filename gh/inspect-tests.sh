@@ -26,9 +26,13 @@ then
   echo
   cat $TEST_LOG
   echo
-  echo "INSTALL LOG: $INSTALL_LOG"
+  echo "TEST LOG END: $TEST_LOG"
+  echo
+  echo "INSTALL LOG BEGIN: $INSTALL_LOG"
   echo
   cat $INSTALL_LOG
+  echo
+  echo "INSTALL LOG END: $INSTALL_LOG"
   exit 1
 fi
 
