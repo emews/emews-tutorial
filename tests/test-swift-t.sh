@@ -88,7 +88,7 @@ FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
 echo "..."
 echo "test-swift-t.sh: STOP: OK"
 
-if (( ${#GITHUB_ACTION} > 0))
+if (( ${#GITHUB_ACTION:-} > 0))
 then
     # For inspect-tests.sh
     echo "TESTS SUCCESS." > test.log
