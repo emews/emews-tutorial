@@ -21,9 +21,11 @@ if ! grep -q "INSTALL SUCCESS." $LOG
 then
   msg "INSTALL FAILED"
   echo
-  echo "LOG: $LOG"
+  echo "LOG BEGIN: $LOG"
   echo
   cat $LOG
+  echo
+  echo "LOG END: $LOG"
   exit 1
 fi
 
