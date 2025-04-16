@@ -182,12 +182,25 @@ conda deactivate
 source $CONDA_BIN_DIR/activate $ENV_NAME
 end_step "$TEXT"
 
+conda-list()
+{
+    {
+        echo conda list
+        conda list 2>&1
+    } >> "$EMEWS_INSTALL_LOG"
+}
+
+conda-list
+
 TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
 conda install -y -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-if [[ $OS != "Darwin" ]]
+conda-list
+
+# if [[ $OS != "Darwin" ]]
+if [[ $AUTO_TEST == "Jenkins" ]]
 then
     GCC_VERSION=12.3.0
     TEXT="Installing gcc==$GCC_VERSION"
@@ -201,6 +214,8 @@ TEXT="Installing PostgreSQL"
 start_step "$TEXT"
 conda install -y -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
+
+conda-list
 
 TEXT="Installing EMEWS Creator"
 start_step "$TEXT"
