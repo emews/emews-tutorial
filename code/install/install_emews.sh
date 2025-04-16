@@ -230,12 +230,6 @@ start_step "$TEXT"
 Rscript $THIS/install_pkgs.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-# Moved into install_pkgs.R
-# TEXT="Installing R EQ.SQL"
-# start_step "$TEXT"
-# Rscript $THIS/install_eq_sql.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-# end_step "$TEXT"
-
 echo
 echo "#"
 echo "# EMEWS installation successful!"
