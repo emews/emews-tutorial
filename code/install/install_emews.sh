@@ -259,8 +259,9 @@ echo "#     $ conda deactivate"
     exec 2>&1
     echo PROBE-ACTIVATE $ENV_NAME
     conda activate $ENV_NAME
-    set -x
     echo CONDA_PREFIX=$CONDA_PREFIX
+    conda list
+    set -x
     ls $CONDA_PREFIX/lib
     ldd $CONDA_PREFIX/lib/libeqr.so
 ) >> "$EMEWS_INSTALL_LOG"
