@@ -115,6 +115,7 @@ while getopts ":ht" option; do
          exit;;
    esac
 done
+shift $(( OPTIND - 1 ))
 
 if [ "$#" -ne 2 ]; then
     help
