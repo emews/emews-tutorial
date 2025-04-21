@@ -334,13 +334,18 @@ echo "#     $ conda deactivate"
     # Quick probe of new installation
     # Merge stderr to stdout:
     exec 2>&1
-    echo PROBE-ACTIVATE $ENV_NAME
+    echo TEST-ACTIVATE $ENV_NAME
     conda activate $ENV_NAME
     echo CONDA_PREFIX=$CONDA_PREFIX
     conda list
     set -x
-    ls $CONDA_PREFIX/lib
-    ldd $CONDA_PREFIX/lib/libeqr.so
+    # ls $CONDA_PREFIX/lib
+    if [[ $OS != "Darwin" ]]
+    then
+        ldd $CONDA_PREFIX/lib/libeqr.so
+    else
+        ls -l $CONDA_PREFIX/lib/libeqr.so
+    fi
 ) >> "$EMEWS_INSTALL_LOG"
 
 {
