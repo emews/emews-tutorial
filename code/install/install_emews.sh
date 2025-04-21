@@ -91,6 +91,7 @@ help() {
    echo
    echo "Arguments:"
    echo "  -h                     display this help and exit"
+   echo "  -q                     quieter: pass -q to conda install"
    echo "  -t                     run additional short tests"
    echo "  -v                     verbose mode for debugging"
    echo "  python-version         python version to use ($V_STRING)"
@@ -109,11 +110,12 @@ RUN_TESTS=0
 # Turning this on reports intermediate Anaconda package lists
 VERBOSE=0
 
-while getopts ":htv" option; do
+while getopts ":hqtv" option; do
    case $option in
       h) # display user help
          help
          exit;;
+      q) QUIET="-q"  ;;
       t) RUN_TESTS=1 ;;
       v) VERBOSE=1   ;;
       \?) # incorrect option
@@ -230,7 +232,7 @@ conda-list 0
 
 TEXT="Installing R"
 start_step "$TEXT"
-conda install -y -c conda-forge "r==4.4" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge "r==4.4" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 1
@@ -246,14 +248,14 @@ fi
 
 TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
-conda install -y -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 2
 
 TEXT="Installing swift-t conda package"
 start_step "$TEXT"
-conda install -y -c conda-forge -c swift-t "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 conda deactivate
 source $CONDA_BIN_DIR/activate $ENV_NAME
 end_step "$TEXT"
@@ -276,7 +278,7 @@ then
     TEXT="Installing gcc==$GCC_VERSION"
     # Upgrades from 11.2.0 to 12.3.0 on GCE Jenkins (Ubuntu 20) (2024-06-11)
     start_step "$TEXT"
-    conda install -y -c conda-forge gcc==$GCC_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+    conda install -y $QUIET -c conda-forge gcc==$GCC_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
     end_step "$TEXT"
 fi
 
@@ -284,7 +286,7 @@ conda-list 4
 
 TEXT="Installing PostgreSQL"
 start_step "$TEXT"
-conda install -y -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 5
