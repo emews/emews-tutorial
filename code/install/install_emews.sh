@@ -92,6 +92,7 @@ help() {
    echo "Arguments:"
    echo "  -h                     display this help and exit"
    echo "  -t                     run additional short tests"
+   echo "  -v                     verbose mode for debugging"
    echo "  python-version         python version to use ($V_STRING)"
    echo "  database-directory     EQ/SQL Database installation directory"
    echo
@@ -104,12 +105,17 @@ help() {
 # before the long install_pkgs.R step
 RUN_TESTS=0
 
-while getopts ":ht" option; do
+# Default: Not verbose
+# Turning this on reports intermediate Anaconda package lists
+VERBOSE=0
+
+while getopts ":htv" option; do
    case $option in
-      h) # display Help
+      h) # display user help
          help
          exit;;
       t) RUN_TESTS=1 ;;
+      v) VERBOSE=1   ;;
       \?) # incorrect option
          help
          exit;;
@@ -205,8 +211,12 @@ then
 fi
 
 function conda-list
-# Debug conda state during installations
+# If VERBOSE, debug conda state during installations
 {
+    if (( ! VERBOSE ))
+    then
+        return
+    fi
     {
         echo
         echo "conda-list:" ${*}
@@ -330,23 +340,26 @@ echo "# To deactivate an active environment, use"
 echo "#"
 echo "#     $ conda deactivate"
 
-(
-    # Quick probe of new installation
-    # Merge stderr to stdout:
-    exec 2>&1
-    echo TEST-ACTIVATE $ENV_NAME
-    conda activate $ENV_NAME
-    echo CONDA_PREFIX=$CONDA_PREFIX
-    conda list
-    set -x
-    # ls $CONDA_PREFIX/lib
-    if [[ $OS != "Darwin" ]]
-    then
-        ldd $CONDA_PREFIX/lib/libeqr.so
-    else
-        ls -l $CONDA_PREFIX/lib/libeqr.so
-    fi
-) >> "$EMEWS_INSTALL_LOG"
+if (( RUN_TESTS ))
+then
+    (
+        # Quick probe of new installation
+        # Merge stderr to stdout:
+        exec 2>&1
+        echo TEST-ACTIVATE $ENV_NAME
+        conda activate $ENV_NAME
+        echo CONDA_PREFIX=$CONDA_PREFIX
+        conda list
+        set -x
+        # ls $CONDA_PREFIX/lib
+        if [[ $OS != "Darwin" ]]
+        then
+            ldd $CONDA_PREFIX/lib/libeqr.so
+        else
+            ls -l $CONDA_PREFIX/lib/libeqr.so
+        fi
+    ) >> "$EMEWS_INSTALL_LOG"
+fi
 
 {
     echo
