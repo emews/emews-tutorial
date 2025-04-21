@@ -31,9 +31,9 @@ jobs:
         run: |
           echo "GITHUB_PAT=${{ secrets.GH_PAT_WOZ }}" >> ~/.Renviron
       - name: Install EMEWS
-        # Build with tests and verbose
+        # Build with quiet, tests, and verbose
         run: |
-          gh/check code/install/install_emews.sh -t -v ${{ matrix.python-version }} $PWD/DB
+          gh/check code/install/install_emews.sh -q -t -v ${{ matrix.python-version }} $PWD/DB
       - name: Inspect installation
         run: |
           gh/inspect-install.sh
