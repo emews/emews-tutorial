@@ -9,12 +9,7 @@ msg()
   echo "inspect-install.sh:" ${*}
 }
 
-if [ $# != 1 ]
-then
-  msg "Provide LOG!"
-  exit 1
-fi
-LOG=$1
+LOG=code/install/emews_install.log
 
 if ! [ -f $LOG ]
 then
