@@ -37,7 +37,8 @@ jobs:
           bash install_emews.sh ${{ matrix.python-version }} $PWD/DB
       - name: Inspect installation
         run: |
-          gh/inspect-install.sh emews_install.log
+          test -r emews-install.log
+          grep -q "INSTALL SUCCESS." emews-install.log
       - name: Runtime tests
         run: |
           which swift-t
