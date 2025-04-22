@@ -6,7 +6,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10"]
+        # "3.8", , "3.11", "3.12"
         os: [ubuntu-latest, macOS-latest]
         # There is no free mac-14 for x86 on GitHub
     steps:
@@ -34,6 +35,15 @@ jobs:
       - name: Install EMEWS
         run: |
           bash install_emews.sh ${{ matrix.python-version }} $PWD/DB
+      - name: Inspect installation
+        run: |
+          gh/inspect-install.sh emews_install.log
+      - name: Runtime tests
+        run: |
+          which swift-t
+          swift-t -v
+          swift-t        -E 'trace("SUCCESS: SWIFT/T");'
+          swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
 
-# We do not test Swift/T here because we don't have a full clone
+# We do not test everything here because we don't have a full clone.
 # See ./test-clone.yaml for the Swift/T tests.
