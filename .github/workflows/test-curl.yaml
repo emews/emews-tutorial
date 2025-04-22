@@ -37,6 +37,8 @@ jobs:
           bash install_emews.sh ${{ matrix.python-version }} $PWD/DB
       - name: Inspect installation
         run: |
+          pwd
+          ls
           test -r emews-install.log
           grep -q "INSTALL SUCCESS." emews-install.log
       - name: Runtime tests
