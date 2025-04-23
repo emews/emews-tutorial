@@ -39,8 +39,8 @@ jobs:
         run: |
           pwd
           ls
-          test -r emews-install.log
-          grep -q "INSTALL SUCCESS." emews-install.log
+          test -r emews_install.log
+          grep -q "INSTALL SUCCESS." emews_install.log
       - name: Runtime tests
         run: |
           which swift-t
