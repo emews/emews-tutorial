@@ -43,7 +43,7 @@ jobs:
           which swift-t
           swift-t -v
           swift-t        -E 'trace("SUCCESS: SWIFT/T");'
-          conda activate emews-py${{ matrix.python-version }} && printenv CONDA_PREFIX
+          conda activate emews-py${{ matrix.python-version }} && echo OK && printenv PWD
 
 
 # TODO: Needs -I $CONDA_PREFIX/lib
