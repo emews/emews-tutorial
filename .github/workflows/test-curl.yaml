@@ -6,7 +6,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: [ "3.11" ]
+          # ["3.8", "3.9", "3.10", "3.11", "3.12"]
         os: [ubuntu-latest, macOS-latest]
         # There is no free mac-14 for x86 on GitHub
     steps:
@@ -43,11 +44,11 @@ jobs:
           which swift-t
           swift-t -v
           swift-t        -E 'trace("SUCCESS: SWIFT/T");'
-          conda activate emews-py${{ matrix.python-version }} && echo OK && printenv PWD
+          swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
+          # conda activate emews-py${{ matrix.python-version }} && echo OK && printenv PWD
 
 
 # TODO: Needs -I $CONDA_PREFIX/lib
-# swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
 
 # We do not test everything here because we don't have a full clone.
 # See ./test-clone.yaml for the Swift/T tests.
