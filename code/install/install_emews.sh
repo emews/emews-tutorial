@@ -377,7 +377,7 @@ source $CONDA_BIN_DIR/activate $ENV_NAME
 set -eux
 # which python conda
 # which swift-t
-\${*}
+"\${*}"
 EOF
     } >> gh-run
     chmod -v u+x gh-run
