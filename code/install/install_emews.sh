@@ -364,6 +364,7 @@ fi
 
 if [[ $AUTO_TEST == "GitHub" ]]
 then
+    echo "creating $PWD / gh-run"
     # On GitHub, create a runner script 'gh-run' for testing
     {
         cat <<EOF
@@ -377,7 +378,7 @@ which python conda
 \${*}
 EOF
     } >> gh-run
-    chmod u+x gh-run
+    chmod -v u+x gh-run
 fi
 
 {
