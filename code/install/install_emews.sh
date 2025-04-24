@@ -369,12 +369,13 @@ then
     {
         cat <<EOF
 #!/bin/bash
-# set -eu
+# This script loads up the Conda environment,
+# then runs the user command
 exec 2>&1
 source $CONDA_BIN_DIR/activate $ENV_NAME
-set -x
+set -eux
 which python conda
-# which swift-t
+which swift-t
 \${*}
 EOF
     } >> gh-run

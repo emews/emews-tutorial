@@ -46,8 +46,8 @@ jobs:
       - name: Runtime tests
         run: |
           ./gh-run echo HELLO
+          ./gh-run swift-t -v
 
-#          swift-t -v
 #          swift-t        -E 'trace("SUCCESS: SWIFT/T");'
 #          swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
           # conda activate emews-py${{ matrix.python-version }} && echo OK && printenv PWD
