@@ -45,7 +45,7 @@ jobs:
           grep "INSTALL SUCCESS." emews_install.log
       - name: Runtime tests
         run: |
-          which swift-t
+          ./gh-run echo HELLO
 
 #          swift-t -v
 #          swift-t        -E 'trace("SUCCESS: SWIFT/T");'

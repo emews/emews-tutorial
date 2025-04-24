@@ -319,7 +319,8 @@ echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
 
 TEXT="Installing R package dependencies"
 start_step "$TEXT"
-Rscript $THIS/install_pkgs.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# TODO: Restore this!
+# Rscript $THIS/install_pkgs.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 echo
@@ -361,6 +362,24 @@ then
             ls -l $CONDA_PREFIX/lib/libeqr.so
         fi
     ) >> "$EMEWS_INSTALL_LOG"
+fi
+
+if [[ $AUTO_TEST == "GitHub" ]]
+then
+    # On GitHub, create a runner script 'gh-run' for testing
+    {
+        cat <<EOF
+#!/bin/bash
+# set -eu
+exec 2>&1
+source $CONDA_BIN_DIR/activate $ENV_NAME
+set -x
+which python conda
+# which swift-t
+\${*}
+EOF
+    } >> gh-run
+    chmod u+x gh-run
 fi
 
 {
