@@ -48,8 +48,7 @@ jobs:
           ./gh-run echo gh-run works
           ./gh-run swift-t -v
           ./gh-run swift-t -E 'trace("SUCCESS: SWIFT/T");'
-#          swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
-          # conda activate emews-py${{ matrix.python-version }} && echo OK && printenv PWD
+          ./gh-run swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
 
 
 # TODO: Needs -I $CONDA_PREFIX/lib
