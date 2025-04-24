@@ -312,8 +312,6 @@ start_step "$TEXT"
 emewscreator init_db -d $2 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-THIS=$( cd $( dirname $0 ) ; /bin/pwd )
-
 echo
 echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
 
