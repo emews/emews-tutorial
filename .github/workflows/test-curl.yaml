@@ -2,7 +2,7 @@ name: Test from Curl
 
 env:
   # For Chicago time on log messages:
-  TZ: CST6CDT
+  TZ: America/Chicago
 
 on:
   # Schedule and workflow_dispatch (manual) only work on default branch
