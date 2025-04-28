@@ -377,8 +377,9 @@ echo GH-RUN:
 echo
 source $CONDA_BIN_DIR/activate $ENV_NAME
 set -eux
-# which python conda
-# which swift-t
+which python conda
+which swift-t
+ls $CONDA_PREFIX/lib
 "\${@}"
 EOF
     } >> gh-run
