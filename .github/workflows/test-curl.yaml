@@ -43,11 +43,17 @@ jobs:
         run: |
           # Look for SUCCESS in log:
           grep "INSTALL SUCCESS." emews_install.log
-      - name: Runtime tests
+      - name: Runtime test: gh-run sanity
         run: |
           ./gh-run echo gh-run works
+      - name: Runtime test: swift-t version info
+        run: |
           ./gh-run swift-t -v
+      - name: Runtime test: swift-t sanity
+        run: |
           ./gh-run swift-t -E 'trace("SUCCESS: SWIFT/T");'
+      - name: Runtime test: swift-t include EQ/R
+        run: |
           ./gh-run swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
 
 
