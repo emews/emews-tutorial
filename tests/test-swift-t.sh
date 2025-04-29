@@ -83,6 +83,7 @@ FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
     swift-t -E 'trace(42);'
     swift-t ${FLAGS[@]} -E 'import EQR;'
     swift-t ${FLAGS[@]} $THIS/test-eqr-1.swift
+    swift-t ${FLAGS[@]} $THIS/test-apps-1.swift
 )
 
 echo "..."
