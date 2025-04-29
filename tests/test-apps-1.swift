@@ -7,6 +7,9 @@
 
 import io;
 import location;
-import EQR;
+import R;
 
-trace(R("library(farver)", "decode_colour(rainbow(10))"));
+trace(
+  R("library(farver)",
+    "toString(decode_colour(rainbow(10)))")
+      );
