@@ -317,7 +317,6 @@ echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
 
 TEXT="Installing R package dependencies"
 start_step "$TEXT"
-# TODO: Restore this!
 Rscript $THIS/install_pkgs.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
