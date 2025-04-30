@@ -10,6 +10,6 @@ import location;
 import R;
 
 trace(
-  R("library(farver)",
-    "toString(decode_colour(rainbow(10)))")
+  R("library(purrr)",
+    "\"R PURRR OK\"")
       );

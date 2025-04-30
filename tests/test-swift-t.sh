@@ -1,8 +1,16 @@
-#!/bin/bash
+#!/bin/zsh
 # Postpone 'set -eu' for conda activate below
 
 # TEST SWIFT-T
 # Test Swift/T under GitHub Actions or Jenkins
+# Provide -E to skip activating an environment
+#         This is good for interactive use
+#         when an environment is already activated.
+
+E=""
+USE_ENV=1
+zparseopts -D -E E=E
+if (( ${#E} )) USE_ENV=0
 
 echo "test-swift-t.sh: START"
 
@@ -29,36 +37,39 @@ then
     echo > test.log
 fi
 
-ENV_NAME=emews-py${PY_VERSION}
-
-CONDA_EXE=$(which conda)
+# CONDA_EXE is set by conda
 # The installation is a bit different on GitHub
 # conda    is in $CONDA_HOME/condabin
 # activate is in $CONDA_HOME/bin
 CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
 CONDA_BIN_DIR=$CONDA_HOME/bin
 
-echo "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
-if ! [[ -f $CONDA_BIN_DIR/activate ]]
-then
-    echo "File not found: '$CONDA_BIN_DIR/activate'"
-    exit 1
-fi
-if ! source $CONDA_BIN_DIR/activate $ENV_NAME
-then
-    echo "could not activate: $ENV_NAME"
-    exit 1
-fi
+# Optionally activate the environment in which EMEWS was installed:
+if (( USE_ENV )) {
+    ENV_NAME=emews-py${PY_VERSION}
 
-if [[ $AUTO_TEST == "Jenkins" ]]
+    echo "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
+    if ! [[ -f $CONDA_BIN_DIR/activate ]]
+    then
+        echo "File not found: '$CONDA_BIN_DIR/activate'"
+        exit 1
+    fi
+    if ! source $CONDA_BIN_DIR/activate $ENV_NAME
+    then
+        echo "could not activate: $ENV_NAME"
+        exit 1
+    fi
+}
+
+set -eu
+
+if [[ ${AUTO_TEST:-} == "Jenkins" ]]
 then
     # See code/install/README.  Sync this with install_emews.sh
     COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
     export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
     echo "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 fi
-
-set -eu
 
 PYTHON_EXE=$(which python)
 ENV_HOME=$(dirname $(dirname $PYTHON_EXE))
@@ -67,6 +78,8 @@ echo "python:  " $PYTHON_EXE
 echo "version: " $(python -V)
 echo "conda:   " $(which conda)
 echo "env:     " $ENV_HOME
+echo "Rscript: " $(which Rscript)
+echo "version: " $(Rscript --version)
 
 # EQ/R files EQR.swift and pkgIndex.tcl should be under ENV/lib:
 SWIFT_LIBS=$ENV_HOME/lib
@@ -76,15 +89,24 @@ SWIFT_LIBS=$ENV_HOME/lib
 export TURBINE_RESIDENT_WORK_WORKERS=1
 FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
 
-(
+setopt LOCAL_OPTIONS
+() {
+    # Anonymous function for 'set -x'
+    # For 'set -x' including newline:
     set -x
+    setopt LOCAL_OPTIONS
+    PS4="
+TEST: "
+
     which swift-t
     swift-t -v
     swift-t -E 'trace(42);'
-    swift-t ${FLAGS[@]} -E 'import EQR;'
-    swift-t ${FLAGS[@]} $THIS/test-eqr-1.swift
-    swift-t ${FLAGS[@]} $THIS/test-apps-1.swift
-)
+    swift-t $FLAGS -E 'import EQR;'
+    swift-t $FLAGS $THIS/test-eqr-1.swift
+    swift-t $FLAGS $THIS/test-apps-1.swift
+    Rscript $THIS/install-graphics.R
+    swift-t $FLAGS $THIS/test-apps-2.swift
+}
 
 echo "..."
 echo "test-swift-t.sh: STOP: OK"
