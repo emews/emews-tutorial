@@ -33,6 +33,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Clone info
+        run: >
+          git log -n 1 --date="format:%Y-%m-%d %H:%m"
+                       --format=tformat:"%h %cd %an : %s"
       - uses: conda-incubator/setup-miniconda@v3
         with:
           # auto-update-conda: true
@@ -43,19 +47,18 @@ jobs:
           echo "whoami:  " $(whoami)
           echo "date:    " $(date "+%Y-%m-%d %H:%M")
           echo "pwd:     " $(pwd -P)
-          # Conda has not been activated- this will change in install_emews.sh
+          # Conda has not been activated-
+          #       this will change in install_emews.sh
           echo "python:  " $(which python)
-          echo
-          git log -n 1 --date="format:%Y-%m-%d %H:%m" --format=tformat:"%h %cd %an : %s"
-          echo
       - name: Set up GitHub PAT
         # Set up PAT for R install_github()
         run: |
           echo "GITHUB_PAT=${{ secrets.GH_PAT_WOZ }}" >> ~/.Renviron
       - name: Install EMEWS
         # Build with quiet, tests, and verbose
-        run: |
-          gh/check code/install/install_emews.sh -q -t -v ${{ matrix.python-version }} $PWD/DB
+        run: >
+          gh/check code/install/install_emews.sh
+                   -q -t -v ${{ matrix.python-version }} $PWD/DB
       - name: Inspect installation
         run: |
           gh/inspect-install.sh
