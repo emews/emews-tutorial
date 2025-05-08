@@ -8,7 +8,7 @@ if (( ${#JENKINS_URL} > 0 ))
 then
     echo "install_emews.sh: detected auto test Jenkins"
     AUTO_TEST="Jenkins"
-elif (( ${GITHUB_ACTIONS:-false} == true ))
+elif [[ ${GITHUB_ACTIONS:-false} == true ]]
 then
     echo "install_emews.sh: detected auto test GitHub"
     AUTO_TEST="GitHub"
