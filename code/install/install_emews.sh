@@ -270,14 +270,14 @@ conda-list 4
 
 TEXT="Installing PostgreSQL"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# conda install -y $QUIET -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 5
 
 TEXT="Installing EMEWS Creator"
 start_step "$TEXT"
-pip install emewscreator >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# pip install emewscreator >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 if [[ $AUTO_TEST == "Jenkins" ]]
@@ -290,7 +290,7 @@ fi
 
 TEXT="Initializing EMEWS Database"
 start_step "$TEXT"
-emewscreator init_db -d $2 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# emewscreator init_db -d $2 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 echo
@@ -307,7 +307,7 @@ logger
 remotes
 Rcpp
 EOF
-Rscript $THIS/install_list.R $THIS/R-pkgs.txt >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# Rscript $THIS/install_list.R $THIS/R-pkgs.txt >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 echo
