@@ -150,7 +150,6 @@ if [ -d $2 ]; then
     exit 1
 fi
 
-
 if [ ! $(command -v conda) ]; then
     echo "Error: conda executable not found. Conda must be activated."
     echo "Try \"source ~/anaconda3/bin/activate\""
@@ -228,14 +227,17 @@ function conda-list
     } >> "$EMEWS_INSTALL_LOG"
 }
 
-conda-list 0
+conda-list 1
 
-TEXT="Installing R"
+# EQ-R depends on Swift/T and R, so that is all we need to specify
+#      to Anaconda.  2025-05-08
+
+TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge "r==4.4" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-conda-list 1
+conda-list 2
 
 if (( RUN_TESTS ))
 then
@@ -246,22 +248,6 @@ then
     )
 fi
 
-TEXT="Installing EMEWS Queues for R"
-start_step "$TEXT"
-conda install -y $QUIET -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-end_step "$TEXT"
-
-conda-list 2
-
-TEXT="Installing swift-t conda package"
-start_step "$TEXT"
-conda install -y $QUIET -c conda-forge -c swift-t "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-conda deactivate
-source $CONDA_BIN_DIR/activate $ENV_NAME
-end_step "$TEXT"
-
-conda-list 3
-
 if (( RUN_TESTS ))
 then
     (
@@ -271,7 +257,6 @@ then
     )
 fi
 
-# if [[ $OS != "Darwin" ]]
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
     GCC_VERSION=12.3.0
@@ -298,9 +283,6 @@ end_step "$TEXT"
 
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
-
-FIX
-
     # See README.  Sync this with test-swift-t.sh
     COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
     export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
@@ -317,7 +299,16 @@ echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
 
 TEXT="Installing R package dependencies"
 start_step "$TEXT"
-Rscript $THIS/install_pkgs.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# R-pkgs.txt is the list of R package names:
+cat <<EOF > $THIS/R-pkgs.txt
+coro
+jsonlite
+purrr
+logger
+remotes
+Rcpp
+EOF
+Rscript $THIS/install_list.R $THIS/R-pkgs.txt >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 echo
