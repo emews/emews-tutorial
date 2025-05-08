@@ -368,6 +368,9 @@ source $CONDA_BIN_DIR/activate $ENV_NAME
 set -eux
 which python conda
 which swift-t
+set -x
+ls $CONDA_PREFIX/lib/EQR.swift
+ls $CONDA_PREFIX/lib/libeqr.so
 "\${@}"
 EOF
     } >> gh-run
