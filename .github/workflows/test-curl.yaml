@@ -51,7 +51,7 @@ jobs:
           # -s : silent
           # -S : show-error
           curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_emews.sh
-          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_pkgs.R
+          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_list.R
       - name: Set up GitHub PAT
         # Set up PAT for R install_github()
         run: |
