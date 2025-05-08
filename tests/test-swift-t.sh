@@ -33,7 +33,7 @@ if (( ${#JENKINS_URL} > 0 ))
 then
     log "detected auto test Jenkins"
     AUTO_TEST="Jenkins"
-elif (( ${GITHUB_ACTIONS:-false} == true ))
+elif [[ ${GITHUB_ACTIONS:-false} == true ]]
 then
     log "detected auto test GitHub"
     AUTO_TEST="GitHub"
