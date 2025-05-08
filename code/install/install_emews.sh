@@ -372,6 +372,7 @@ which swift-t
 "\${@}"
 EOF
     } >> gh-run
+    cat gh-run
     chmod -v u+x gh-run
 fi
 
