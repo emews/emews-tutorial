@@ -21,7 +21,6 @@ log "START"
 USE_ENV=1
 USE_R=1
 DO_INSTALL=1
-set -x
 while getopts "EIR" option
 do
     case $option in
