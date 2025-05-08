@@ -1,8 +1,10 @@
 #!/bin/sh
+exec 2>&1
 
 # GH CHECK
 # Run command, always return success for GitHub action!
 # Allows us to capture artifacts and test for success later
+
 
 echo "CHECK: ${*}"
 
@@ -21,6 +23,7 @@ echo "CHECK: PWD: $PWD"
 echo "CHECK: LS:"
 ls -a
 ls -a tests
+ls -al tests/test-swift-t.sh
 
 # Run the arguments here!
 if ${*}
