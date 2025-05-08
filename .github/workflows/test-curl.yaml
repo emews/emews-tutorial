@@ -74,10 +74,10 @@ jobs:
           ./gh-run swift-t -v
       - name: "Runtime test: swift-t sanity"
         run: |
-          ./gh-run swift-t -E 'trace("SUCCESS: SWIFT/T");'
+          ./gh-run swift-t -E 'trace("SUCCESS SWIFT/T");'
       - name: "Runtime test: swift-t include EQ/R"
         run: |
-          ./gh-run swift-t -i EQR -E 'trace("SUCCESS: EQ/R   ");'
+          ./gh-run swift-t -i EQR -E 'trace("SUCCESS EQ/R   ");'
 
 
 # TODO: Needs -I $CONDA_PREFIX/lib
