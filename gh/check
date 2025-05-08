@@ -16,7 +16,11 @@ fi
 
 PATH=$PWD/gh:$PATH
 
+set -x
 echo "CHECK: PWD: $PWD"
+echo "CHECK: LS:"
+ls -a
+ls -a tests
 
 # Run the arguments here!
 if ${*}
