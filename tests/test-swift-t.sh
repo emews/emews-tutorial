@@ -37,13 +37,13 @@ else
     AUTO_TEST=""
 fi
 
-if (( $AUTO_TEST == "Jenkins" ))
+if [[ $AUTO_TEST == "Jenkins" ]]
 then
     # CELS Jenkins environment
     CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/Miniconda-311_23.11.0-1/bin
     PATH=$CONDA_BIN_DIR:$PATH
     # Otherwise, we are on GitHub, and GitHub provides python, conda
-elif (( $AUTO_TEST == "GitHub" ))
+elif [[ $AUTO_TEST == "GitHub" ]]
 then
     # CONDA_EXE is set by conda
     # The installation is a bit different on GitHub
