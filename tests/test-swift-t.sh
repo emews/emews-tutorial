@@ -21,28 +21,40 @@ then
 fi
 
 PY_VERSION=$1
-
 THIS=$( dirname $0 )
 
+# Are we running under an automated testing environment?
 if (( ${#JENKINS_URL} > 0 ))
 then
-    # CELS Jenkins environment
-    PATH=$WORKSPACE/../EMEWS-Conda/Miniconda-311_23.11.0-1/bin:$PATH
-    # Otherwise, we are on GitHub, and GitHub provides python, conda
+    echo "test-swift-t.sh: detected auto test Jenkins"
+    AUTO_TEST="Jenkins"
+elif (( ${GITHUB_ACTIONS:-false} == true ))
+then
+    echo "test-swift-t.sh: detected auto test GitHub"
+    AUTO_TEST="GitHub"
+else
+    # Other- possibly interactive user run.  Set to empty string.
+    AUTO_TEST=""
 fi
 
-if (( ${#GITHUB_ACTION} > 0))
+if (( $AUTO_TEST == "Jenkins" ))
 then
+    # CELS Jenkins environment
+    CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/Miniconda-311_23.11.0-1/bin
+    PATH=$CONDA_BIN_DIR:$PATH
+    # Otherwise, we are on GitHub, and GitHub provides python, conda
+elif (( $AUTO_TEST == "GitHub" ))
+then
+    # CONDA_EXE is set by conda
+    # The installation is a bit different on GitHub
+    # conda    is in $CONDA_HOME/condabin
+    # activate is in $CONDA_HOME/bin
+    CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
+    CONDA_BIN_DIR=$CONDA_HOME/bin
+
     # Placeholder with no content:
     echo > test.log
 fi
-
-# CONDA_EXE is set by conda
-# The installation is a bit different on GitHub
-# conda    is in $CONDA_HOME/condabin
-# activate is in $CONDA_HOME/bin
-CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
-CONDA_BIN_DIR=$CONDA_HOME/bin
 
 # Optionally activate the environment in which EMEWS was installed:
 if (( USE_ENV )) {
@@ -63,7 +75,7 @@ if (( USE_ENV )) {
 
 set -eu
 
-if [[ ${AUTO_TEST:-} == "Jenkins" ]]
+if [[ $AUTO_TEST == "Jenkins" ]]
 then
     # See code/install/README.  Sync this with install_emews.sh
     COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
@@ -111,7 +123,7 @@ TEST: "
 echo "..."
 echo "test-swift-t.sh: STOP: OK"
 
-if [[ ${GITHUB_ACTION:-} != "" ]]
+if [[ $AUTO_TEST == "GitHub" ]]
 then
     # For inspect-tests.sh
     echo "TESTS SUCCESS." > test.log
