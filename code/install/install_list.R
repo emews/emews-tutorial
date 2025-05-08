@@ -1,7 +1,12 @@
 
-# INSTALL APPS
+# INSTALL LIST R
 # Install key application libraries as test
-# Provide a single file name
+# Provide a single file name, with 1 package name per line
+# The file is read with the R scan() function,
+#     so blank lines and comments are allowed with '#'
+
+# EXAMPLE:
+# $ Rscript install_list.R pkgs-list.txt
 
 # Installation settings:
 r <- getOption("repos")
@@ -11,12 +16,12 @@ r["CRAN"] <- "http://cran.wustl.edu/"
 options(repos = r)
 NCPUS = 8
 
-cat("INSTALL-APPS.R ...\n")
+cat("INSTALL_LIST.R ...\n")
 
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) != 1) {
-  cat("INSTALL-APPS.R: provide 1 file!\n")
+  cat("INSTALL_LIST.R: provide 1 file!\n")
   quit(status=1)
 }
 
@@ -43,4 +48,4 @@ for (pkg in PKGS) {
 }
 
 cat("\n")
-cat("INSTALL-APPS.R: OK\n");
+cat("INSTALL_LIST.R: OK\n");
