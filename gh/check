@@ -7,9 +7,6 @@ exec 2>&1
 # Allows us to capture artifacts and test for success later
 # Adds gh/ to PATH to shorten commands
 
-PY_VERSION=${1:-0}
-echo PY_VERSION=$PY_VERSION
-shift
 echo "CHECK: ${*}"
 
 if [ ! -d gh ]
