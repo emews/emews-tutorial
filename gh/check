@@ -16,6 +16,8 @@ fi
 
 PATH=$PWD/gh:$PATH
 
+echo "CHECK: PWD: $PWD"
+
 # Run the arguments here!
 if ${*}
 then
