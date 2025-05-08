@@ -59,6 +59,9 @@ jobs:
       - name: Install EMEWS
         run: |
           bash install_emews.sh ${{ matrix.python-version }} $PWD/DB
+      - name: Show log
+        run: |
+          cat emews_install.log
       - name: Inspect installation
         run: |
           # Look for SUCCESS in log:
