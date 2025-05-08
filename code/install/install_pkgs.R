@@ -1,4 +1,6 @@
 
+# UNUSED: See ./install_list.R
+
 # INSTALL R PKGS
 
 # Run this via install_emews.sh
