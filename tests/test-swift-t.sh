@@ -1,23 +1,38 @@
-#!/bin/zsh
+#!/bin/bash
 # Postpone 'set -eu' for conda activate below
+# Use bash, not ZSH, because we are running in a
+#     raw GitHub environment
 
 # TEST SWIFT-T
 # Test Swift/T under GitHub Actions or Jenkins
 # Provide -E to skip activating an environment
 #         This is good for interactive use
 #         when an environment is already activated.
+# Provide -I to skip installing R packages
+# Provide -R to skip testing R cases
 
 log()
 {
-  print "test-swift-t.sh:" ${*}
+  echo "test-swift-t.sh:" ${*}
 }
 
 log "START"
 
-E=""
 USE_ENV=1
-zparseopts -D -E E=E
-if (( ${#E} )) USE_ENV=0
+USE_R=1
+DO_INSTALL=1
+set -x
+while getopts "EIR" option
+do
+    case $option in
+      E) USE_ENV=0    ;;
+      I) DO_INSTALL=0 ;;
+      R) USE_R=0      ;;
+      *) # Bash prints an error message
+         exit 1 ;;
+    esac
+done
+shift $(( OPTIND - 1 ))
 
 if (( ${#} != 1 ))
 then
@@ -26,6 +41,7 @@ then
 fi
 
 PY_VERSION=$1
+echo "PY_VERSION=$PY_VERSION"
 THIS=$( dirname $0 )
 
 # Are we running under an automated testing environment?
@@ -64,7 +80,8 @@ else
 fi
 
 # Optionally activate the environment in which EMEWS was installed:
-if (( USE_ENV )) {
+if (( USE_ENV ))
+then
     ENV_NAME=emews-py${PY_VERSION}
 
     log "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
@@ -78,7 +95,7 @@ if (( USE_ENV )) {
         log "could not activate: $ENV_NAME"
         exit 1
     fi
-}
+fi
 
 set -eu
 
@@ -95,7 +112,7 @@ ENV_HOME=$(dirname $(dirname $PYTHON_EXE))
 
 log "python:  " $PYTHON_EXE
 log "version: " $(python -V)
-log "conda:   " $(=which conda)
+log "conda:   " $(which conda)
 log "env:     " $ENV_HOME
 log "Rscript: " $(which Rscript)
 log "version: " $(Rscript --version)
@@ -108,26 +125,46 @@ SWIFT_LIBS=$ENV_HOME/lib
 export TURBINE_RESIDENT_WORK_WORKERS=1
 FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
 
-setopt LOCAL_OPTIONS
-() {
-    # Anonymous function for 'set -x'
-    setopt LOCAL_OPTIONS
-    # For 'set -x' including newline:
-    PS4="
-TEST: "
-    set -x
-
-    which swift-t
-    swift-t -v
-    swift-t -E 'trace(42);'
-    swift-t $FLAGS -E 'import EQR;'
-    swift-t $FLAGS $THIS/test-eqr-1.swift
-    swift-t $FLAGS $THIS/test-apps-1.swift
-    Rscript $THIS/install-graphics.R
-    swift-t $FLAGS $THIS/test-apps-2.swift
+R_install()
+{
+    Rscript $THIS/../code/install/install_list.R ${*}
 }
 
-log "..."
+(
+    # Subshells for 'set -x' and exit from R tests
+    (
+        set -x
+        which swift-t
+        swift-t -v
+        swift-t -E 'trace(42);'
+    )
+    if (( ! USE_R ))
+    then
+        log "skipping R tests."
+        exit # from subshell
+    fi
+    if (( DO_INSTALL ))
+    then
+        (
+            set -x
+            R_install $THIS/pkgs-graphics.txt
+            R_install $THIS/pkgs-lattice.txt
+        )
+    fi
+    (
+        set -x
+        # Simply load EQ/R:
+        swift-t ${FLAGS[@]} -E 'import EQR;'
+        swift-t ${FLAGS[@]} $THIS/test-eqr-1.swift
+        # Purrr:
+        swift-t ${FLAGS[@]} $THIS/test-apps-1.swift
+        # Farver:
+        swift-t ${FLAGS[@]} $THIS/test-apps-2.swift
+        # Lattice:
+        swift-t ${FLAGS[@]} $THIS/test-apps-3.swift
+    )
+)
+
 log "STOP: OK"
 
 if [[ $AUTO_TEST == "GitHub" ]]

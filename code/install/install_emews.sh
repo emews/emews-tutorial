@@ -114,13 +114,13 @@ while getopts ":hqtv" option; do
    case $option in
       h) # display user help
          help
-         exit;;
+         exit        ;;
       q) QUIET="-q"  ;;
       t) RUN_TESTS=1 ;;
       v) VERBOSE=1   ;;
       \?) # incorrect option
          help
-         exit;;
+         exit 1      ;;
    esac
 done
 shift $(( OPTIND - 1 ))
