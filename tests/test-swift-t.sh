@@ -64,12 +64,11 @@ then
     PATH=${CONDA_BIN_DIR:a}:$PATH
 elif [[ $AUTO_TEST == "GitHub" ]]
 then
-    # CONDA_EXE is set by conda
     # The installation is a bit different on GitHub
     # conda    is in $CONDA_HOME/condabin
     # activate is in $CONDA_HOME/bin
+    CONDA_EXE=$(which conda)
     CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
-
     CONDA_BIN_DIR=$CONDA_HOME/bin
 
     # Placeholder with no content:
