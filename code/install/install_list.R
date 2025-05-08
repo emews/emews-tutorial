@@ -8,6 +8,8 @@
 # EXAMPLE:
 # $ Rscript install_list.R pkgs-list.txt
 
+cat("INSTALL_LIST.R ...\n")
+
 # Installation settings:
 r <- getOption("repos")
 # Change this mirror as needed:
@@ -15,8 +17,6 @@ r <- getOption("repos")
 r["CRAN"] <- "http://cran.wustl.edu/"
 options(repos = r)
 NCPUS = 8
-
-cat("INSTALL_LIST.R ...\n")
 
 args <- commandArgs(trailingOnly = TRUE)
 
