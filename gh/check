@@ -1,14 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 set -eu
 exec 2>&1
 
 # GH CHECK
 # Run command, always return success for GitHub action!
 # Allows us to capture artifacts and test for success later
-
-echo "CHECK: ${*}"
-
 # Adds gh/ to PATH to shorten commands
+
+PY_VERSION=${1:-0}
+echo PY_VERSION=$PY_VERSION
+shift
+echo "CHECK: ${*}"
 
 if [ ! -d gh ]
 then
@@ -18,15 +20,8 @@ fi
 
 PATH=$PWD/gh:$PATH
 
-set -x
-echo "CHECK: PWD: $PWD"
-echo "CHECK: LS:"
-ls -a
-ls -a tests
-ls -al tests/test-swift-t.sh
-
 # Run the arguments here!
-if zsh ${*}
+if ${*}
 then
   echo "CHECK: OK."
 else
