@@ -113,8 +113,8 @@ NOTE: For more information on conda enviroments see https://conda.io/projects/co
 +
 [source, bash]
 ----
-$ curl -L -O https://raw.githubusercontent.com/jozik/emews-tutorial/main/code/install/install_emews.sh
-$ curl -L -O https://raw.githubusercontent.com/jozik/emews-tutorial/main/code/install/install_list.R
+$ curl -L -O https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_emews.sh
+$ curl -L -O https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_list.R
 ----
 
 . *Run the Installer*
