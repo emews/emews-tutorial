@@ -230,10 +230,9 @@ conda-list 1
 
 # EQ-R depends on Swift/T and R, so that is all we need to specify
 #      to Anaconda.  2025-05-08
-# But eq-r is not pulling in swift-t-r on GH Ubuntu 2025-05-08
 TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge -c swift-t eq-r swift-t-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t eq-r "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 2
