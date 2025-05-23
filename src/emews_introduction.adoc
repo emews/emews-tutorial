@@ -134,7 +134,7 @@ The install script, `install_emews.sh`, takes two arguments:
 $ bash install_emews.sh <python-version> <database-directory>
 ----
 +
-  .. The Python version to use - one of 3.8, 3.9, 3.10, or 3.11
+  .. The Python version to use - one of 3.9, 3.10, 3.11, or 3.12
   .. The EMEWS DB database install directory - this must *NOT* already exist
 +
 The install will take a few minutes to download and install the necessary components,
