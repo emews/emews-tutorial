@@ -16,6 +16,18 @@ you do not have an existing conda installation. For the differences between the 
 See <<quickstart>> for how to download the install scripts and install the environment with the `install_emews.sh` script. The remainder
 of this section will walk through the relevant parts of the script in greater detail. 
 
+[[binary_install_versions,Supported Software Versions for Binary Install]]
+==== Supported Software Versions for Binary Install
+
+The binary installs currently include support for:
+
+* Python: 3.9, 3.10, 3.11, or 3.12
+* R: 4.4
+
+Compilers:
+
+* clang: (Python 3.9: clang-18)
+
 ==== The Install Script
 
 After performing some initial error checking and variable definition, the install script performs the
