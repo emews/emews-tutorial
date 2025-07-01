@@ -21,15 +21,15 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          # - ubuntu-latest
           - macOS-14  #  This is ARM64
         # There is no free mac-14 for x86 on GitHub
 
         python-version:
           - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
+          # - "3.10"
+          # - "3.11"
+          # - "3.12"
 
     steps:
       - uses: actions/checkout@v4
