@@ -26,8 +26,8 @@ jobs:
         # There is no free mac-14 for x86 on GitHub
 
         python-version:
-          - "3.9"
-          # - "3.10"
+          # - "3.9"
+          - "3.10"
           # - "3.11"
           # - "3.12"
 
