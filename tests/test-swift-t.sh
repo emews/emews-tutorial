@@ -5,6 +5,7 @@
 
 # TEST SWIFT-T
 # Test Swift/T under GitHub Actions or Jenkins
+# Provide Python version as MAJOR.MINOR
 # Provide -E to skip activating an environment
 #         This is good for interactive use
 #         when an environment is already activated.
@@ -16,11 +17,13 @@ log()
   echo "test-swift-t.sh:" ${*}
 }
 
-log "START"
+log "START: ARGS: ${*}"
 
+# Defaults:
 USE_ENV=1
 USE_R=1
 DO_INSTALL=1
+
 while getopts "EIR" option
 do
     case $option in

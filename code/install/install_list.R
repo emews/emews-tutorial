@@ -28,6 +28,7 @@ if (length(args) != 1) {
 pkg_file = args[1]
 cat(paste("pkg list file:", pkg_file, "\n"))
 
+# Read the file!
 PKGS <- scan(pkg_file, what="", sep="\n", comment.char = "#")
 
 # Install and test each package
