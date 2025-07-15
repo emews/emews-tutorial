@@ -91,6 +91,8 @@ help() {
    echo
    echo "Arguments:"
    echo "  -h                     display this help and exit"
+   echo "  -k                     keep   any existing DB"
+   echo "  -r                     remove any existing DB"
    echo "  -q                     quieter: pass -q to conda install"
    echo "  -t                     run additional short tests"
    echo "  -v                     verbose mode for debugging"
@@ -110,17 +112,27 @@ RUN_TESTS=0
 # Turning this on reports intermediate Anaconda package lists
 VERBOSE=0
 
-while getopts ":hqtv" option; do
+# Default: If the DB exists, that is an ERROR.
+# Other possibilities:
+# -k : KEEP:   Keeps an existing DB
+# -r : REMOVE: Removes and re-makes the DB
+DB_EXISTENCE=ERROR
+# Remember if we found an existing DB: Do not try to init it:
+DB_KEPT=0
+
+while getopts ":hkrqtv" option; do
    case $option in
       h) # display user help
          help
-         exit        ;;
-      q) QUIET="-q"  ;;
-      t) RUN_TESTS=1 ;;
-      v) VERBOSE=1   ;;
+         exit                ;;
+      k) DB_EXISTENCE=KEEP   ;;
+      r) DB_EXISTENCE=REMOVE ;;
+      q) QUIET="-q"          ;;
+      t) RUN_TESTS=1         ;;
+      v) VERBOSE=1           ;;
       \?) # incorrect option
          help
-         exit 1      ;;
+         exit 1              ;;
    esac
 done
 shift $(( OPTIND - 1 ))
@@ -130,10 +142,12 @@ if [ "$#" -ne 2 ]; then
     # Invalid argument count is an error:
     exit 1
 fi
+ARG_PV=$1
+ARG_DB=$2
 
 PY_VERSION=''
 for V in "${VALID_VERSIONS[@]}"; do
-    if [ $V = $1 ]; then
+    if [ $V = $ARG_PV ]; then
         PY_VERSION=$V
     fi
 done
@@ -143,11 +157,24 @@ if [ -z "$PY_VERSION" ]; then
     exit 1
 fi
 
-if [ -d $2 ]; then
-    echo "Error: Database directory already exists: $2"
-    echo "       This script will not overwrite an existing database."
-    echo "       Remove it or specify a different directory."
-    exit 1
+if [ -d $ARG_DB ]; then
+    echo "Database directory already exists: $ARG_DB"
+    case $DB_EXISTENCE in
+      KEEP)
+        echo "Keeping the DB."
+        DB_KEPT=1                 ;;
+      REMOVE)
+        echo "Deleting the DB..."
+        rm -r $ARG_DB             ;;
+      ERROR)
+        echo " Error:"
+        echo " This script will not overwrite an existing database."
+        echo " Remove it or specify a different directory."
+        exit 1                    ;;
+      *)
+        echo "Internal error."
+        exit 1                    ;;
+    esac
 fi
 
 if [ ! $(command -v conda) ]; then
@@ -287,10 +314,13 @@ then
     echo "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 fi
 
+if (( ! DB_KEPT ))
+then
 TEXT="Initializing EMEWS Database"
 start_step "$TEXT"
 emewscreator init_db -d $2 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
+fi
 
 echo
 echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
