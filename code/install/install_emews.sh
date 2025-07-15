@@ -325,6 +325,12 @@ fi
 echo
 echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
 
+TEXT="Downloading EMEWS R package installer"
+start_step "$TEXT"
+echo "Downloading EMEWS R package list..."
+curl -L -O https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_list.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+end_step "$TEXT"
+
 TEXT="Installing R package dependencies"
 start_step "$TEXT"
 # R-pkgs.txt is the list of R package names:
