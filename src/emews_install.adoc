@@ -108,7 +108,7 @@ end_step "$TEXT"
 EMEWS Creator is then used to initialize the EMEWS DB database in the
 database directory location (i.e., `$2`) that was passed in the command line.
 See <<_init_db>> for more information for more details about the database installation,
-and <<creating_emews_projects>> for more on EMEWS Creator.
+and <<creating_emews_projects>> for more on EMEWS Creator.  If you wish to keep or automatically remove and re-initialize an existing database, see `install_emews.sh -h` for relevant options.
 
 [source, bash]
 ----
