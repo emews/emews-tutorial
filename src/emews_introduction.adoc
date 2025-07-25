@@ -109,7 +109,7 @@ you do not have an existing conda installation. For the differences between the 
 +
 NOTE: For more information on conda enviroments see https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html[here]
 
-. *Download the installer files*
+. *Download the installer file*
 +
 [source, bash]
 ----
