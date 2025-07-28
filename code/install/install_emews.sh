@@ -169,9 +169,10 @@ if [ -d $ARG_DB ]; then
         echo "Deleting the DB..."
         rm -r $ARG_DB             ;;
       ERROR)
-        echo " Error:"
-        echo " This script will not overwrite an existing database."
-        echo " Remove it or specify a different directory."
+        echo "Error:"
+        echo "By default, this script will not overwrite" \
+             "an existing database."
+        echo "Remove it or specify a different directory."
         exit 1                    ;;
       *)
         echo "Internal error."
