@@ -63,7 +63,7 @@ jobs:
       - name: Inspect installation
         run: |
           gh/inspect-install.sh
-      - name: Test Swift/T
+      - name: Test Swift/T and Apps
         run: |
           gh/check tests/test-swift-t.sh ${{ matrix.python-version }}
       - name: Inspect tests
