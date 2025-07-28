@@ -66,6 +66,9 @@ jobs:
         run: |
           # Look for SUCCESS in log:
           grep "INSTALL SUCCESS." emews_install.log
+
+      # gh-run tests ...
+      # gh-run is created by install_emews.sh
       - name: "Runtime test: gh-run sanity"
         run: |
           ./gh-run echo gh-run works
