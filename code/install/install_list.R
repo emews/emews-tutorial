@@ -43,8 +43,9 @@ for (pkg in PKGS) {
                   keep_outputs=TRUE)
   cat("\n")
   # Test that the pkg installed and is loadable
-  cat("LOAD:    ", progress, pkg, "\n")
+  cat("LOADING:    ", progress, pkg, "\n")
   library(package=pkg, character.only=TRUE)
+  cat("LOAD OK:    ", progress, pkg, "\n")
   count <- count + 1
 }
 
