@@ -13,11 +13,12 @@ then
     echo "install_emews.sh: detected auto test GitHub"
     AUTO_TEST="GitHub"
 else
-    # Other- possibly interactive user run.  Set to empty string.
+    # Other- probably interactive user run.  Set to empty string.
     AUTO_TEST=""
 fi
 
 function start_step {
+    # Produces output for a new installation step
     if (( ! ${#AUTO_TEST} ))
     then
         # Normal shell run
@@ -37,6 +38,7 @@ function start_step {
 }
 
 function end_step {
+    # Produces output to end an installation step
     if (( ! ${#AUTO_TEST} ))
     then
         # Normal shell run - overwrite last line and show check mark
