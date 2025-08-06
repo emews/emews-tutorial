@@ -150,6 +150,7 @@ R_install()
             set -x
             log "probe GCC libs:"
             echo $CONDA_PREFIX/lib/gcc/arm64-*/*
+            ls /Users/runner/miniconda3/envs/emews-py3.10/lib/gcc/arm64-apple-darwin20.0.0/15.1.0
             R_install $THIS/pkgs-graphics.txt
             R_install $THIS/pkgs-lattice.txt
         )
