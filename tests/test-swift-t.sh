@@ -148,6 +148,8 @@ R_install()
     then
         (
             set -x
+            log "probe GCC libs:"
+            echo $CONDA_PREFIX/lib/gcc/arm64-*/*
             R_install $THIS/pkgs-graphics.txt
             R_install $THIS/pkgs-lattice.txt
         )
