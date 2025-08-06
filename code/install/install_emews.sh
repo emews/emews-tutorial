@@ -81,7 +81,7 @@ function on_error {
     exit 1
 }
 
-VALID_VERSIONS=("3.8" "3.9" "3.10" "3.11" "3.12")
+VALID_VERSIONS=("3.8" "3.9" "3.10" "3.11" "3.12" "3.13")
 V_PREFIX=(${VALID_VERSIONS[@]::${#VALID_VERSIONS[@]}-1})
 V_SUFFIX="${VALID_VERSIONS[@]: -1}"
 printf -v joined '%s, ' "${V_PREFIX[@]}"
