@@ -80,6 +80,35 @@ else
     : Assume user set up Anaconda!
 fi
 
+## Some important steps:
+
+R_install()
+{
+    Rscript $THIS/../code/install/install_list.R ${*}
+}
+
+setup_mac_makevars()
+# Fix the build environment for GH/Mac
+# Cf. https://stackoverflow.com/questions/76096681/macos-brew-system-r-packages-fail-to-install-with-emutls-w
+{
+    # Set up GCC version
+    log "setup_mac_makevars: probe GCC libs:"
+    echo $CONDA_PREFIX/lib/gcc/arm64-*/*
+    # Change this when GH OS changes:
+    GCC_VERSION=arm64-apple-darwin20.0.0/15.1.0
+    log "setup_mac_makevars: try: GCC_VERSION=$GCC_VERSION"
+
+    # Create/edit Makevars:
+    MAKEVARS=$HOME/.R/Makevars
+    log "setup_mac_makevars: edit $MAKEVARS"
+    mkdir -pv ~/.R
+    printf 'LDFLAGS=-L %s/lib/gcc/%s $(LDFLAGS)\n' \
+           $CONDA_PREFIX $GCC_VERSION >> $MAKEVARS
+    log "setup_mac_makevars: Makevars contents:"
+    cat $MAKEVARS
+    log "setup_mac_makevars: OK"
+}
+
 # Optionally activate the environment in which EMEWS was installed:
 if (( USE_ENV ))
 then
@@ -121,15 +150,15 @@ log "version: " $(Rscript --version)
 # EQ/R files EQR.swift and pkgIndex.tcl should be under ENV/lib:
 SWIFT_LIBS=$ENV_HOME/lib
 
+if [[ $AUTO_TEST == "GitHub" ]] && [[ $RUNNER_OS == "macOS" ]]
+then
+    setup_mac_makevars
+fi
+
 # Run tests!
 
 export TURBINE_RESIDENT_WORK_WORKERS=1
 FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
-
-R_install()
-{
-    Rscript $THIS/../code/install/install_list.R ${*}
-}
 
 (
     # Subshells for 'set -x' and exit from R tests
@@ -148,9 +177,6 @@ R_install()
     then
         (
             set -x
-            log "probe GCC libs:"
-            echo $CONDA_PREFIX/lib/gcc/arm64-*/*
-            ls /Users/runner/miniconda3/envs/emews-py3.10/lib/gcc/arm64-apple-darwin20.0.0/15.1.0
             R_install $THIS/pkgs-graphics.txt
             R_install $THIS/pkgs-lattice.txt
         )
