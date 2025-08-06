@@ -43,7 +43,7 @@ then
 fi
 
 PY_VERSION=$1
-echo "PY_VERSION=$PY_VERSION"
+log "PY_VERSION=$PY_VERSION"
 THIS=$( dirname $0 )
 
 # Are we running under an automated testing environment?
