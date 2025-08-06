@@ -102,8 +102,8 @@ setup_mac_makevars()
     MAKEVARS=$HOME/.R/Makevars
     log "setup_mac_makevars: edit $MAKEVARS"
     mkdir -pv ~/.R
-    printf 'LDFLAGS=-L %s/lib/gcc/%s $(LDFLAGS)\n' \
-           $CONDA_PREFIX $GCC_VERSION >> $MAKEVARS
+    printf "LDFLAGS += -L %s/lib/gcc/%s\n" \
+           $CONDA_PREFIX $GCC_VERSION      >> $MAKEVARS
     log "setup_mac_makevars: Makevars contents:"
     cat $MAKEVARS
     log "setup_mac_makevars: OK"
