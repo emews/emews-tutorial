@@ -150,6 +150,7 @@ log "version: " $(Rscript --version)
 # EQ/R files EQR.swift and pkgIndex.tcl should be under ENV/lib:
 SWIFT_LIBS=$ENV_HOME/lib
 
+# RUNNER_OS is set by GitHub:
 if [[ $AUTO_TEST == "GitHub" ]] && [[ $RUNNER_OS == "macOS" ]]
 then
     setup_mac_makevars
