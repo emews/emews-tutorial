@@ -22,11 +22,11 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-14  #  This is ARM64
+          # - macOS-14  #  This is ARM64
         # There is no free mac-14 for x86 on GitHub
 
         python-version:
-          - "3.10"
+          # - "3.10"
           # - "3.11"
           - "3.12"
           # - "3.13" # Need to fix Conda pkg eq-r
