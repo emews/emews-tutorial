@@ -14,7 +14,8 @@ cat("INSTALL_LIST.R ...\n")
 r <- getOption("repos")
 # Change this mirror as needed:
 # r["CRAN"] <- "http://cran.cnr.berkeley.edu/"
-r["CRAN"] <- "http://cran.wustl.edu/"
+# r["CRAN"] <- "http://cran.wustl.edu/"
+r["CRAN"] <- "https://cran.case.edu/"
 options(repos = r)
 NCPUS = 8
 
