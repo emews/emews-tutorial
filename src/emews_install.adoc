@@ -26,7 +26,8 @@ The binary installs currently include support for:
 
 Compilers:
 
-* clang: (Anaconda package `clang-18`)
+* On Linux (`linux-64`): GCC: (Anaconda package `gcc`)
+* On Mac (`osx-arm64`): Clang: (Anaconda package `clang==18.1.8`)
 
 ==== The Install Script
 
