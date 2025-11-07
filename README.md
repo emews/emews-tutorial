@@ -17,7 +17,10 @@ and accessible via http://emews.org
 
 Must install asciidoctor as APT package, then asciidoctor-bibtex as Ruby Gem.
 
-Gem does not seem to work in Anaconda, Python 3.11, 2024-02-06 .
+Gem does not seem to work in:
+
+* Anaconda, Python 3.11, 2024-02-06
+* Anaconda, Python 3.13, 2025-11-07
 
 So do all these steps:
 
