@@ -21,12 +21,12 @@ of this section will walk through the relevant parts of the script in greater de
 
 The binary installs currently include support for:
 
-* Python: 3.9, 3.10, 3.11, or 3.12
+* Python: 3.10, 3.11, 3.12, or 3.13
 * R: 4.4
 
 Compilers:
 
-* clang: (Python 3.9: clang-18)
+* clang: (Anaconda package `clang-18`)
 
 ==== The Install Script
 
