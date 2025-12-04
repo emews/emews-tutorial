@@ -9,6 +9,7 @@
 # Provide -E to skip activating an environment
 #         This is good for interactive use
 #         when an environment is already activated.
+# Provide -M to turn on Makevars (fixes build errors on Mac)
 # Provide -I to skip installing R packages
 # Provide -R to skip testing R cases
 
@@ -21,15 +22,17 @@ log "START: ARGS: ${*}"
 
 # Defaults:
 USE_ENV=1
-USE_R=1
 DO_INSTALL=1
+USE_MAKEVARS=0
+USE_R=1
 
-while getopts "EIR" option
+while getopts "EIMR" option
 do
     case $option in
-      E) USE_ENV=0    ;;
-      I) DO_INSTALL=0 ;;
-      R) USE_R=0      ;;
+      E) USE_ENV=0      ;;
+      I) DO_INSTALL=0   ;;
+      M) USE_MAKEVARS=1 ;;
+      R) USE_R=0        ;;
       *) # Bash prints an error message
          exit 1 ;;
     esac
@@ -94,14 +97,19 @@ setup_mac_makevars()
     # Set up GCC version
     log "setup_mac_makevars: probe GCC libs:"
     echo $CONDA_PREFIX/lib/gcc/arm64-*/*
-    # Change this when GH OS changes:
-    GCC_VERSION=arm64-apple-darwin20.0.0/15.1.0
+    # Change this when GCC version changes:
+    GCC_VERSION=arm64-apple-darwin20.0.0/15.2.0
     log "setup_mac_makevars: try: GCC_VERSION=$GCC_VERSION"
 
     # Create/edit Makevars:
     MAKEVARS=$HOME/.R/Makevars
     log "setup_mac_makevars: edit $MAKEVARS"
     mkdir -pv ~/.R
+    if [[ -e $MAKEVARS ]]
+    then
+        # Assume GNU coreutils:
+        cp -v --backup=numbered $MAKEVARS $MAKEVARS.bak
+    fi
     printf "LDFLAGS += -L %s/lib/gcc/%s\n" \
            $CONDA_PREFIX $GCC_VERSION      >> $MAKEVARS
     log "setup_mac_makevars: Makevars contents:"
@@ -151,7 +159,8 @@ log "version: " $(Rscript --version)
 SWIFT_LIBS=$ENV_HOME/lib
 
 # RUNNER_OS is set by GitHub:
-if [[ $AUTO_TEST == "GitHub" ]] && [[ $RUNNER_OS == "macOS" ]]
+if ( [[ $AUTO_TEST == "GitHub" ]] &&
+     [[ $RUNNER_OS == "macOS"  ]]    ) || (( $USE_MAKEVARS ))
 then
     setup_mac_makevars
 fi
