@@ -206,3 +206,12 @@ $ export R_LIBS_USER=x
 This sets `R_LIBS_USER` to a non-existent location, thus ignoring it.
 
 4. Check your R build configuration files, `~/R/Makevars` and `~/.Renviron` .  These should normally be empty for EMEWS, however, you can re-add any needed features after you get EMEWS working.
+
+5. To temporarily deactivate `Makevars`, set these variables before running the EMEWS install script:
++
+[source,bash]
+----
+$ export R_MAKEVARS_USER='' R_MAKEVARS_SITE=''
+$ code/install/install_emews.sh ...
+----
+
