@@ -182,22 +182,27 @@ When you run EMEWS Creator, you will need to refer to the tools installed here (
 
 == Troubleshooting
 
+If the following troubleshooting notes do not help, try the EMEWS mailing list:
+<<_emews_mailing_list,EMEWS Mailing List>>
+
 === Problems with R
 
 ==== Compile-time problems with R
 
-If R packages fail to install, check your environment:
+If R packages fail to install, check the following settings that affect how R compiles its packages from C/C++ source code.
 
-1. Ensure no unnecessary environment variables are set:
-https://stat.ethz.ch/R-manual/R-devel/library/base/html/EnvVar.html,
-particularly +R_LIBS_USER+.
+1. Ensure no unnecessary environment variables are set, particularly `R_LIBS_USER`.  See here for more information about environment variables that affect R: +
+https://stat.ethz.ch/R-manual/R-devel/library/base/html/EnvVar.html
 
-2. Inside R, use +Sys.getenv()+ and +.libPaths()+ to make sure no custom user libraries are affecting R.
+2. Inside R, use `Sys.getenv()` and `.libPaths()` to make sure no custom user libraries are affecting R.
 
 3. If you have R libraries installed on your system, you can force R to ignore them by setting this environment variable in your shell:
 +
-+$ export R_LIBS_USER=x+
+[source,bash]
+----
+$ export R_LIBS_USER=x
+----
 +
-This sets +R_LIBS_USER+ to a non-existent location, thus ignoring it.
+This sets `R_LIBS_USER` to a non-existent location, thus ignoring it.
 
-4. Check your R build configuration files, +~/R/Makevars+ and +~/.Renviron+ .  These should be empty for EMEWS, however, you can re-add any needed features after you get EMEWS working.
+4. Check your R build configuration files, `~/R/Makevars` and `~/.Renviron` .  These should normally be empty for EMEWS, however, you can re-add any needed features after you get EMEWS working.
