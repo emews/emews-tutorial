@@ -180,14 +180,14 @@ or build them manually.
 
 When you run EMEWS Creator, you will need to refer to the tools installed here (R and Tcl) during EQ/R build process.
 
-== Troubleshooting
+=== Troubleshooting
 
 If the following troubleshooting notes do not help, try the EMEWS mailing list:
 <<_emews_mailing_list,EMEWS Mailing List>>
 
-=== Problems with R
+==== Problems with R
 
-==== Compile-time problems with R
+===== Compile-time problems with R
 
 If R packages fail to install, check the following settings that affect how R compiles its packages from C/C++ source code.
 
