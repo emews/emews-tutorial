@@ -373,8 +373,13 @@ then
         # Quick probe of new installation
         # Merge stderr to stdout:
         exec 2>&1
-        echo TEST-ACTIVATE $ENV_NAME
-        conda activate $ENV_NAME
+        echo TEST-ACTIVATE $ENV_NAME ...
+        if ! conda activate $ENV_NAME
+        then
+            echo "Error: could not activate '$ENV_NAME'"
+            exit 1
+        fi
+        echo TEST-ACTIVATE $ENV_NAME OK
         echo CONDA_PREFIX=$CONDA_PREFIX
         conda list
         set -x
