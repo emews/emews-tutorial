@@ -407,7 +407,7 @@ echo
 echo GH-RUN:
 echo
 echo source
-source $CONDA_PREFIX/etc/profile.d/conda.sh
+source $CONDA_PREFIX/../../etc/profile.d/conda.sh
 echo activate
 conda activate $ENV_NAME
 echo setup ok
