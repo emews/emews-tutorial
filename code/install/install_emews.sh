@@ -397,6 +397,7 @@ if [[ $AUTO_TEST == "GitHub" ]]
 then
     echo "creating $PWD / gh-run"
     # On GitHub, create a runner script 'gh-run' for testing
+    # Currently has an "orphan process" issue on GitHub
     {
         cat <<EOF
 #!/bin/bash
@@ -404,15 +405,17 @@ then
 # then runs the user command
 exec 2>&1
 echo
-echo GH-RUN: \${@}
+echo GH-RUN: command: \${@}
 echo
-set +e
-echo source
+if [[ $RUNNER_OS == Linux ]]
+then
+    echo GH-RUN: not running on Linux
+    exit
+fi
+echo source conda.sh
 source $CONDA_PREFIX/../../etc/profile.d/conda.sh
-set -x
-echo activate $ENV_NAME
+echo  activate $ENV_NAME
 conda activate $ENV_NAME
-echo setup ok
 set -eux
 which python conda
 which swift-t
@@ -422,10 +425,9 @@ ls $CONDA_PREFIX/lib/libeqr.so
 "\${@}"
 EOF
     } >> gh-run
-    # source $CONDA_BIN_DIR/activate $ENV_NAME
-    echo contents of gh-run start:
+    echo "contents of gh-run start:"
     cat gh-run
-    echo contents of gh-run stop.
+    echo "contents of gh-run stop."
     chmod -v u+x gh-run
 fi
 
