@@ -404,11 +404,12 @@ then
 # then runs the user command
 exec 2>&1
 echo
-echo GH-RUN:
+echo GH-RUN: \${@}
 echo
+set +e
 echo source
 source $CONDA_PREFIX/../../etc/profile.d/conda.sh
-echo activate
+echo activate $ENV_NAME
 conda activate $ENV_NAME
 echo setup ok
 set -eux
@@ -421,7 +422,9 @@ ls $CONDA_PREFIX/lib/libeqr.so
 EOF
     } >> gh-run
     # source $CONDA_BIN_DIR/activate $ENV_NAME
+    echo contents of gh-run start:
     cat gh-run
+    echo contents of gh-run stop.
     chmod -v u+x gh-run
 fi
 
