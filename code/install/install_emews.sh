@@ -262,7 +262,7 @@ conda-list 1
 #      to Anaconda.  2025-05-08
 TEXT="Installing EMEWS Queues for R"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge -c swift-t eq-r "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 2
