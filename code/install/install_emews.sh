@@ -406,7 +406,11 @@ exec 2>&1
 echo
 echo GH-RUN:
 echo
-source $CONDA_BIN_DIR/activate $ENV_NAME
+echo source
+source $CONDA_PREFIX/etc/profile.d/conda.sh
+echo activate
+conda activate $ENV_NAME
+echo setup ok
 set -eux
 which python conda
 which swift-t
@@ -416,6 +420,7 @@ ls $CONDA_PREFIX/lib/libeqr.so
 "\${@}"
 EOF
     } >> gh-run
+    # source $CONDA_BIN_DIR/activate $ENV_NAME
     cat gh-run
     chmod -v u+x gh-run
 fi
@@ -423,7 +428,7 @@ fi
 {
     echo
     echo "INSTALL SUCCESS."
-} >> "$EMEWS_INSTALL_LOG"
+} | tee "$EMEWS_INSTALL_LOG"
 
 
 # Local Variables:
