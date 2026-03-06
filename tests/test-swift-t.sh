@@ -205,13 +205,13 @@ FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
     )
 )
 
-log "STOP: OK"
-
 if [[ $AUTO_TEST == "GitHub" ]]
 then
     # For inspect-tests.sh
     echo "TESTS SUCCESS." > test.log
 fi
+
+log "STOP: OK"
 
 # Local Variables:
 # sh-basic-offset: 4
