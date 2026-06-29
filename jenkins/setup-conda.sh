@@ -37,14 +37,14 @@ tm()
   =time --format "TIME: %E" ${*}
 }
 
-
-# Clean up prior runs
+# Clean up prior installations
 uninstall()
 {
   log "UNINSTALL ..."
   rm -fv $WORKSPACE/$MINICONDA_SH
-  log "DELETE: $WORKSPACE/sfw/Miniconda-$CONDA_LABEL ..."
-  rm -fr $TARGET
+  log "DELETE: $WORKSPACE/sfw/Miniconda-* ..."
+  print -l $WORKSPACE/sfw/Miniconda-*
+  rm -fr   $WORKSPACE/sfw/Miniconda-*
   log "UNINSTALL OK."
 }
 
