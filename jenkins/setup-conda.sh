@@ -42,7 +42,10 @@ uninstall()
 {
   log "UNINSTALL ..."
   rm -fv $WORKSPACE/$MINICONDA_SH
-  log "DELETE: $WORKSPACE/sfw/Miniconda-* ..."
+  log "DELETE INSTALLERS:"
+  print -l Miniconda3-*
+  rm -f    Miniconda3-*
+  log "DELETE INSTALLATIONS: $WORKSPACE/sfw/Miniconda-* ..."
   print -l $WORKSPACE/sfw/Miniconda-*
   rm -fr   $WORKSPACE/sfw/Miniconda-*
   log "UNINSTALL OK."
