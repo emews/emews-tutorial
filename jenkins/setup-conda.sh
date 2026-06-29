@@ -59,7 +59,6 @@ do-download()
 {
   log "DOWNLOADS ..."
   (
-    mkdir -pv $WORKSPACE/downloads
     cd $WORKSPACE/downloads
     if [[ ! -f $MINICONDA_SH ]] \
          wget --no-verbose https://repo.anaconda.com/miniconda/$MINICONDA_SH
@@ -91,6 +90,7 @@ log "MINICONDA: $MINICONDA_SH"
 TARGET=$WORKSPACE/sfw/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
 log "TARGET: $TARGET"
 
+mkdir -pv $WORKSPACE/downloads
 if (( ${#UNINSTALL} )) uninstall
 do-download
 
