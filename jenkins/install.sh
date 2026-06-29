@@ -11,6 +11,19 @@ log()
   print ${(%)DATE_FMT_NICE} "install.sh:" ${*}
 }
 
+tm()
+{
+  =time --format "TIME: %E" ${*}
+}
+
+report-disk-space()
+{
+  print
+  log "DISK SPACE: WORKSPACE:"
+  tm du -sh $WORKSPACE
+  print
+}
+
 log "JENKINS INSTALL SH"
 
 THIS=${0:h:A}
@@ -55,3 +68,5 @@ if [[ -d $DB ]] {
 
 log "INSTALL SUCCESS"
 print
+
+report-disk-space
