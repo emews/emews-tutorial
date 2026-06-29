@@ -40,7 +40,7 @@ zparseopts -D -E -F c:=CL p:=PV u=UNINSTALL
 if (( ${#PV} )) PYTHON_VERSION=${PV[2]}
 if (( ${#CL} )) CONDA_LABEL=${CL[2]}
 
-MINICONDA=$WORKSPACES/EMEWS-Conda/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
+MINICONDA=$WORKSPACES/EMEWS-Conda/sfw/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
 log "MINICONDA: $MINICONDA"
 if [[ ! -d $MINICONDA ]] {
   log "Not found: MINICONDA=$MINICONDA"
