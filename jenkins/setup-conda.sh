@@ -23,6 +23,21 @@ log "SETUP CONDA"
 log "HOSTNAME: $(hostname)"
 log "UPTIME:   $(uptime)"
 
+help()
+{
+  cat <<EOF
+-p PYTHON_VERSION  default "$PYTHON_VERSION"
+-c CONDA_LABEL     default "$CONDA_LABEL"
+-u                 delete prior artifacts, default does not
+EOF
+}
+
+tm()
+{
+  =time --format "TIME: %E" ${*}
+}
+
+
 # Clean up prior runs
 uninstall()
 {
@@ -33,8 +48,7 @@ uninstall()
   log "UNINSTALL OK."
 }
 
-downloads()
-# Download and install Miniconda
+do-download()
 {
   log "DOWNLOADS ..."
   (
@@ -46,13 +60,12 @@ downloads()
   log "DOWNLOADS OK."
 }
 
-help()
+report-disk-space()
 {
-  cat <<EOF
--p PYTHON_VERSION  default "$PYTHON_VERSION"
--c CONDA_LABEL     default "$CONDA_LABEL"
--u                 delete prior artifacts, default does not
-EOF
+  print
+  log "DISK SPACE: WORKSPACE:"
+  tm du -sh $WORKSPACE
+  print
 }
 
 # Run plain help as needed before possibly affecting settings:
@@ -72,7 +85,7 @@ TARGET=$WORKSPACE/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
 log "TARGET: $TARGET"
 
 if (( ${#UNINSTALL} )) uninstall
-downloads
+do-download
 
 if [[ -d $TARGET ]] {
   log "Installation exists: $TARGET"
@@ -81,5 +94,7 @@ if [[ -d $TARGET ]] {
   bash $MINICONDA_SH -b -p $TARGET
   log "INSTALL OK: $TARGET"
 }
+
+report-disk-space
 
 log "DONE."
