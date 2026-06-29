@@ -7,7 +7,7 @@ set -eu
 
 # Defaults:
 PYTHON_VERSION=${PYTHON_VERSION:-311}
-CONDA_LABEL=${CONDA_LABEL:-23.11.0-1}
+CONDA_LABEL=${CONDA_LABEL:-26.1.1-1}
 
 DATE_FMT_NICE="%D{%Y-%m-%d} %D{%H:%M:%S}"
 log()
