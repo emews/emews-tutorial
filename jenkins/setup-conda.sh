@@ -1,5 +1,6 @@
 #!/bin/zsh
 set -eu
+setopt NULL_GLOB
 
 # JENKINS SETUP CONDA SH
 # Installs Miniconda package file in MINICONDA_SH
@@ -40,14 +41,17 @@ tm()
 # Clean up prior installations
 uninstall()
 {
+  # Temp cleanup - DROP THIS
+  ls -ld $WORKSPACE/Mini*
+  rm -r  $WORKSPACE/Mini*
+
   log "UNINSTALL ..."
-  rm -fv $WORKSPACE/$MINICONDA_SH
   log "DELETE INSTALLERS:"
-  print -l Miniconda3-*
-  rm -f    Miniconda3-*
+  ls -l  $WORKSPACE/downloads
+  rm -fv $WORKSPACE/downloads/*
   log "DELETE INSTALLATIONS: $WORKSPACE/sfw/Miniconda-* ..."
-  print -l $WORKSPACE/sfw/Miniconda-*
-  rm -fr   $WORKSPACE/sfw/Miniconda-*
+  ls -ld $WORKSPACE/sfw/Miniconda-*
+  rm -fr $WORKSPACE/sfw/Miniconda-*
   log "UNINSTALL OK."
 }
 
@@ -55,8 +59,8 @@ do-download()
 {
   log "DOWNLOADS ..."
   (
-    mkdir -pv $WORKSPACE
-    cd $WORKSPACE
+    mkdir -pv $WORKSPACE/downloads
+    cd $WORKSPACE/downloads
     if [[ ! -f $MINICONDA_SH ]] \
          wget --no-verbose https://repo.anaconda.com/miniconda/$MINICONDA_SH
   )
@@ -84,7 +88,7 @@ renice --priority 19 --pid ${$} >& /dev/null
 
 MINICONDA_SH=Miniconda3-py${PYTHON_VERSION}_${CONDA_LABEL}-Linux-x86_64.sh
 log "MINICONDA: $MINICONDA_SH"
-TARGET=$WORKSPACE/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
+TARGET=$WORKSPACE/sfw/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
 log "TARGET: $TARGET"
 
 if (( ${#UNINSTALL} )) uninstall
@@ -94,7 +98,7 @@ if [[ -d $TARGET ]] {
   log "Installation exists: $TARGET"
 } else {
   log "INSTALL ..."
-  bash $MINICONDA_SH -b -p $TARGET
+  bash downloads/$MINICONDA_SH -b -p $TARGET
   log "INSTALL OK: $TARGET"
 }
 
