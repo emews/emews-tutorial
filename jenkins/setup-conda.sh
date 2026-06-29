@@ -41,10 +41,6 @@ tm()
 # Clean up prior installations
 uninstall()
 {
-  # Temp cleanup - DROP THIS
-  ls -ld $WORKSPACE/Mini*
-  rm -r  $WORKSPACE/Mini*
-
   log "UNINSTALL ..."
   log "DELETE INSTALLERS:"
   ls -l  $WORKSPACE/downloads
