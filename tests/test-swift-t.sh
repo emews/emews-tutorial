@@ -1,6 +1,6 @@
 #!/bin/bash
 # Postpone 'set -eu' for conda activate below
-# Use bash, not ZSH, because we are running in a
+# Use bash, not ZSH, because we may be running in a
 #     raw GitHub environment
 
 # TEST SWIFT-T
@@ -25,6 +25,8 @@ USE_ENV=1
 DO_INSTALL=1
 USE_MAKEVARS=0
 USE_R=1
+CONDA_LABEL_DEFAULT=26.1.1-1
+: ${CONDA_LABEL:=$CONDA_LABEL_DEFAULT}
 
 while getopts "EIMR" option
 do
@@ -66,7 +68,7 @@ fi
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
     # CELS Jenkins environment
-    CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/Miniconda-311_23.11.0-1/bin
+    CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/Miniconda-311_${CONDA_LABEL}/bin
     PATH=${CONDA_BIN_DIR:a}:$PATH
 elif [[ $AUTO_TEST == "GitHub" ]]
 then
