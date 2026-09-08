@@ -81,6 +81,7 @@ function on_error {
     exit 1
 }
 
+# Sync versions with README
 VALID_VERSIONS=("3.10" "3.11" "3.12" "3.13")
 V_PREFIX=(${VALID_VERSIONS[@]::${#VALID_VERSIONS[@]}-1})
 V_SUFFIX="${VALID_VERSIONS[@]: -1}"

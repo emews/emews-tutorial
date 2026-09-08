@@ -19,7 +19,7 @@ $ install_emews.sh -h
 
 for help.
 
-The packages will be installed in a Conda environment named `emews-py${PY_VERSION}` , where `PY_VERSION` is one of `"3.8" "3.9" "3.10" "3.11"`.
+The packages will be installed in a Conda environment named `emews-py${PY_VERSION}` , where `PY_VERSION` is one of `"3.10" "3.11" "3.12" "3.13"`.
 
 Use `conda activate` to activate the installed environment.
 
