@@ -81,11 +81,14 @@ function on_error {
     exit 1
 }
 
+# Sync versions with README
 VALID_VERSIONS=("3.10" "3.11" "3.12" "3.13")
 V_PREFIX=(${VALID_VERSIONS[@]::${#VALID_VERSIONS[@]}-1})
 V_SUFFIX="${VALID_VERSIONS[@]: -1}"
 printf -v joined '%s, ' "${V_PREFIX[@]}"
 V_STRING="${joined% } or $V_SUFFIX"
+
+EQ_R_VERSION=1.2
 
 help() {
    echo "Usage: install_emews.sh <python-version> <database-directory>"
@@ -260,9 +263,9 @@ conda-list 1
 
 # EQ-R depends on Swift/T and R, so that is all we need to specify
 #      to Anaconda.  2025-05-08
-TEXT="Installing EMEWS Queues for R"
+TEXT="Installing EMEWS Queues for R (EQ/R)"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge -c swift-t eq-r "swift-t-r==1.6.6" >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t eq-r=$EQ_R_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 2
@@ -373,8 +376,13 @@ then
         # Quick probe of new installation
         # Merge stderr to stdout:
         exec 2>&1
-        echo TEST-ACTIVATE $ENV_NAME
-        conda activate $ENV_NAME
+        echo TEST-ACTIVATE $ENV_NAME ...
+        if ! conda activate $ENV_NAME
+        then
+            echo "Error: could not activate '$ENV_NAME'"
+            exit 1
+        fi
+        echo TEST-ACTIVATE $ENV_NAME OK
         echo CONDA_PREFIX=$CONDA_PREFIX
         conda list
         set -x
@@ -392,6 +400,7 @@ if [[ $AUTO_TEST == "GitHub" ]]
 then
     echo "creating $PWD / gh-run"
     # On GitHub, create a runner script 'gh-run' for testing
+    # Currently has an "orphan process" issue on GitHub
     {
         cat <<EOF
 #!/bin/bash
@@ -399,9 +408,17 @@ then
 # then runs the user command
 exec 2>&1
 echo
-echo GH-RUN:
+echo GH-RUN: command: \${@}
 echo
-source $CONDA_BIN_DIR/activate $ENV_NAME
+if [[ $RUNNER_OS == Linux ]]
+then
+    echo GH-RUN: not running on Linux
+    exit
+fi
+echo source conda.sh
+source $CONDA_PREFIX/../../etc/profile.d/conda.sh
+echo  activate $ENV_NAME
+conda activate $ENV_NAME
 set -eux
 which python conda
 which swift-t
@@ -411,14 +428,16 @@ ls $CONDA_PREFIX/lib/libeqr.so
 "\${@}"
 EOF
     } >> gh-run
+    echo "contents of gh-run start:"
     cat gh-run
+    echo "contents of gh-run stop."
     chmod -v u+x gh-run
 fi
 
 {
     echo
     echo "INSTALL SUCCESS."
-} >> "$EMEWS_INSTALL_LOG"
+} | tee "$EMEWS_INSTALL_LOG"
 
 
 # Local Variables:
