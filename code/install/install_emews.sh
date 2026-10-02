@@ -419,6 +419,7 @@ echo source conda.sh
 source $CONDA_PREFIX/../../etc/profile.d/conda.sh
 echo  activate $ENV_NAME
 conda activate $ENV_NAME
+conda list
 set -eux
 which python conda
 which swift-t
