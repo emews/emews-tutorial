@@ -88,7 +88,7 @@ V_SUFFIX="${VALID_VERSIONS[@]: -1}"
 printf -v joined '%s, ' "${V_PREFIX[@]}"
 V_STRING="${joined% } or $V_SUFFIX"
 
-EQ_R_VERSION=1.2
+EQ_R_VERSION=1.3
 
 help() {
    echo "Usage: install_emews.sh <python-version> <database-directory>"
