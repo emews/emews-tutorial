@@ -82,7 +82,7 @@ function on_error {
 }
 
 # Sync versions with README
-VALID_VERSIONS=("3.10" "3.11" "3.12" "3.13")
+VALID_VERSIONS=("3.11" "3.12" "3.13" "3.14")
 V_PREFIX=(${VALID_VERSIONS[@]::${#VALID_VERSIONS[@]}-1})
 V_SUFFIX="${VALID_VERSIONS[@]: -1}"
 printf -v joined '%s, ' "${V_PREFIX[@]}"
