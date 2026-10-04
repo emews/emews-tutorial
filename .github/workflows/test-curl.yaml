@@ -3,6 +3,10 @@ name: Test from Curl
 env:
   # For Chicago time on log messages:
   TZ: America/Chicago
+  # Setting to avoid MPID_Init() issues with MANA
+  #         on GitHub Azure system:
+  #         From Claude: 2026-10-04:
+  UCX_TLS: sm,self
 
 on:
   # Schedule and workflow_dispatch (manual) only work on default branch
