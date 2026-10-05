@@ -126,6 +126,58 @@ Cf. https://github.com/satijalab/seurat/issues/5650
 
 This is handled by `install_pkgs.R`, see <<R packages>>.
 
+=== Corrupted conda cache (macOS)
+
+On macOS, the install may fail at the final "Installing R package dependencies"
+step with a `dyld` crash:
+
+----
+dyld: Library not loaded: @rpath/libomp.dylib
+  Referenced from: .../conda-cache/emews-r-N-1/lib/R/bin/exec/R
+----
+
+This is caused by a corrupted `emews-r` package in the conda package cache.
+Earlier in the log you will also see:
+
+----
+SafetyError: The package for emews-r ... appears to be corrupted.
+The path 'lib/R/doc/html/packages.html' has an incorrect size.
+----
+
+followed by several `ClobberError`s (path collisions for `xorg-xorgproto`,
+`xorg-libx11`, `libsqlite` against the already-installed `tk`). The corrupt
+transaction leaves `libomp.dylib` misplaced, so R crashes and the R packages
+are never installed.
+
+Root cause: conda installs cache files into the environment as *hardlinks*
+(shared inode). R regenerates `lib/R/doc/html/packages.html` at runtime when
+packages are installed, and that write propagates back through the hardlink and
+mutates the integrity-tracked copy in the conda cache. The next conda
+transaction then detects the mismatch.
+
+NOTE: The installer may still print `INSTALL SUCCESS` even when this step
+failed. Verify the R packages actually loaded by checking for
+`LOAD OK: [6/6]` in `emews_install.log`, or run
+`Rscript -e 'rownames(installed.packages())'`.
+
+Fix: remove the corrupt cache package(s), then reinstall. The helper script
+`clean_conda_cache.py` scans the conda package cache and removes any extracted
+package whose files no longer match its `info/paths.json` integrity data:
+
+----
+# Report corrupt packages (dry run):
+$ ./clean_conda_cache.py
+# Remove them:
+$ ./clean_conda_cache.py --delete
+----
+
+Then remove the environment and re-run the installer:
+
+----
+$ conda env remove -n emews-py${PY_VERSION}
+$ ./install_emews.sh -k ${PY_VERSION} <database-directory>
+----
+
 == Developer details
 
 When running under automated testing (GitHub or Jenkins), i.e. `AUTO_TEST`, we simplify the output for compatibility with the web browser interface, and do not use emojis or carriage returns.
