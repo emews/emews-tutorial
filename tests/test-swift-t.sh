@@ -82,7 +82,10 @@ then
     # Placeholder with no content:
     echo > test.log
 else
-    : Assume user set up Anaconda!
+    # Assume user set up Anaconda!
+    CONDA_EXE=$(which conda)
+    CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
+    CONDA_BIN_DIR=$CONDA_HOME/bin
 fi
 
 ## Some important steps:
@@ -96,16 +99,30 @@ setup_mac_makevars()
 # Fix the build environment for GH/Mac
 # Cf. https://stackoverflow.com/questions/76096681/macos-brew-system-r-packages-fail-to-install-with-emutls-w
 {
-    # Set up GCC version
+    # NOTE: As of emews-r 9, R's own FLIBS (in lib/R/etc/Makeconf) points at
+    # the correct, pinned gcc lib dir, so this Makevars hack should no longer
+    # be needed to fix the '-lemutls_w' build error.  It is retained only as
+    # an escape hatch (-M) for unusual environments.
+    # Set up GCC version: auto-detect it rather than hard-coding, so a stale
+    # version string can never inject a non-existent -L path.
     log "setup_mac_makevars: probe GCC libs:"
     echo $CONDA_PREFIX/lib/gcc/arm64-*/*
-    # Change this when GCC version changes:
-    GCC_VERSION=arm64-apple-darwin20.0.0/15.2.0
-    log "setup_mac_makevars: try: GCC_VERSION=$GCC_VERSION"
+    local GCC_ARCH_DIR GCC_REL
+    GCC_ARCH_DIR=$( ls -d $CONDA_PREFIX/lib/gcc/arm64-*/ 2>/dev/null | head -1 )
+    if [[ -z $GCC_ARCH_DIR ]]
+    then
+        log "setup_mac_makevars: no gcc lib dir found; skipping."
+        return
+    fi
+    # GCC_REL is e.g. 'arm64-apple-darwin20.0.0/16.2.0'
+    GCC_REL=${GCC_ARCH_DIR#$CONDA_PREFIX/lib/gcc/}
+    GCC_REL=${GCC_REL%/}
+    log "setup_mac_makevars: detected GCC_REL=$GCC_REL"
 
-    # Create/edit Makevars:
+    # Create/overwrite Makevars.  Overwrite (not append) so repeated runs
+    # cannot accumulate stale -L paths from old environments.
     MAKEVARS=$HOME/.R/Makevars
-    log "setup_mac_makevars: edit $MAKEVARS"
+    log "setup_mac_makevars: writing $MAKEVARS"
     mkdir -pv ~/.R
     if [[ -e $MAKEVARS ]]
     then
@@ -113,7 +130,7 @@ setup_mac_makevars()
         cp -v --backup=numbered $MAKEVARS $MAKEVARS.bak
     fi
     printf "LDFLAGS += -L %s/lib/gcc/%s\n" \
-           $CONDA_PREFIX $GCC_VERSION      >> $MAKEVARS
+           $CONDA_PREFIX $GCC_REL          > $MAKEVARS
     log "setup_mac_makevars: Makevars contents:"
     cat $MAKEVARS
     log "setup_mac_makevars: OK"
@@ -160,9 +177,10 @@ log "version: " $(Rscript --version)
 # EQ/R files EQR.swift and pkgIndex.tcl should be under ENV/lib:
 SWIFT_LIBS=$ENV_HOME/lib
 
-# RUNNER_OS is set by GitHub:
-if ( [[ $AUTO_TEST == "GitHub" ]] &&
-     [[ $RUNNER_OS == "macOS"  ]]    ) || (( $USE_MAKEVARS ))
+# As of emews-r 9, R's FLIBS is correct and the Makevars workaround is no
+# longer needed, so it is no longer enabled automatically (not even on GitHub
+# macOS).  Use -M explicitly if an environment still needs it.
+if (( $USE_MAKEVARS ))
 then
     setup_mac_makevars
 fi

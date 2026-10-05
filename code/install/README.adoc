@@ -67,10 +67,22 @@ More info: https://snyk.io/blog/how-to-use-github-actions-environment-variables
 
 === Postgres Version
 
+The PostgreSQL version is selected per-platform in `install_emews.sh`
+(`SPEC_POSTGRES`, keyed on the conda subdir).  PostgreSQL is
+python-independent, so the same spec covers all supported Python versions.
+
 ==== linux-aarch64
 
 Postgres has been pinned to 14.12 as later versions on conda-forge crash
 on linux-aarch64
+
+==== osx-arm64
+
+Postgres uses `postgresql>=17,<18` here, not 14.12.  Our custom-built
+`emews-r` (>=9) depends on `cairo>=1.18.6`, which requires `icu>=78`.
+PostgreSQL 14.12 pulls in a `libxml2` that caps `icu<=75`, so it cannot
+coexist with `emews-r` 9.  A newer PostgreSQL is compatible with the newer
+`icu` and resolves the conflict.
 
 ==== GCE
 

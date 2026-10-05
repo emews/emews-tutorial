@@ -300,9 +300,24 @@ fi
 
 conda-list 4
 
-TEXT="Installing PostgreSQL"
+# PostgreSQL version depends on platform.  See code/install/README.adoc.
+# linux-aarch64: pin to 14.12; later conda-forge builds crash there.
+# osx-arm64: our custom emews-r (>=9) pulls cairo>=1.18.6 -> icu>=78, which
+#   conflicts with the libxml2 required by postgresql 14.12 (icu<=75).  Use a
+#   newer PostgreSQL that is compatible with the newer icu.  PostgreSQL is
+#   python-independent, so this is unaffected by the Python version.
+CONDA_SUBDIR=$( conda info --json 2>/dev/null \
+                | python -c "import json,sys; print(json.load(sys.stdin).get('platform',''))" )
+if [[ $CONDA_SUBDIR == "osx-arm64" ]]
+then
+    SPEC_POSTGRES="postgresql>=17,<18"
+else
+    SPEC_POSTGRES="postgresql==14.12"
+fi
+
+TEXT="Installing PostgreSQL ($SPEC_POSTGRES)"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge $SPEC_POSTGRES >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 5
