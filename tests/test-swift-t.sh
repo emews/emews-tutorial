@@ -18,7 +18,8 @@ log()
   echo "test-swift-t.sh:" ${*}
 }
 
-log "START: ARGS: ${*}"
+log "START: $( date "+%Y-%m-%d %H:%M" )"
+log "ARGS: ${*}"
 
 # Defaults:
 USE_ENV=1
