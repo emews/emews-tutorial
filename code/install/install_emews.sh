@@ -438,7 +438,7 @@ fi
 {
     echo
     echo "INSTALL SUCCESS."
-} | tee "$EMEWS_INSTALL_LOG"
+} | tee -a "$EMEWS_INSTALL_LOG"
 
 
 # Local Variables:
