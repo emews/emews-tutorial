@@ -261,11 +261,29 @@ function conda-list
 
 conda-list 1
 
+# Detect the conda platform once; used below to select platform-specific
+# package specs (emews-r and PostgreSQL).  These are python-independent,
+# so the same specs apply to all supported Python versions.
+CONDA_SUBDIR=$( conda info --json 2>/dev/null \
+                | python -c "import json,sys; print(json.load(sys.stdin).get('platform',''))" )
+
+# emews-r is our custom R build, only on osx-arm64 (other platforms use the
+# community 'r').  Pin it to >=9: earlier builds baked a stale gfortran path
+# into R's FLIBS, so R package builds failed with '-lemutls_w'.  eq-r pulls
+# emews-r transitively and unpinned, so without this the solver may select an
+# old, broken emews-r (e.g. 7).
+if [[ $CONDA_SUBDIR == "osx-arm64" ]]
+then
+    SPEC_EMEWS_R="emews-r>=9"
+else
+    SPEC_EMEWS_R=""
+fi
+
 # EQ-R depends on Swift/T and R, so that is all we need to specify
 #      to Anaconda.  2025-05-08
 TEXT="Installing EMEWS Queues for R (EQ/R)"
 start_step "$TEXT"
-conda install -y $QUIET -c conda-forge -c swift-t eq-r=$EQ_R_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge -c swift-t eq-r=$EQ_R_VERSION $SPEC_EMEWS_R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 conda-list 2
@@ -300,14 +318,13 @@ fi
 
 conda-list 4
 
-# PostgreSQL version depends on platform.  See code/install/README.adoc.
+# PostgreSQL version depends on platform (CONDA_SUBDIR set above).
+# See code/install/README.adoc.
 # linux-aarch64: pin to 14.12; later conda-forge builds crash there.
 # osx-arm64: our custom emews-r (>=9) pulls cairo>=1.18.6 -> icu>=78, which
 #   conflicts with the libxml2 required by postgresql 14.12 (icu<=75).  Use a
 #   newer PostgreSQL that is compatible with the newer icu.  PostgreSQL is
 #   python-independent, so this is unaffected by the Python version.
-CONDA_SUBDIR=$( conda info --json 2>/dev/null \
-                | python -c "import json,sys; print(json.load(sys.stdin).get('platform',''))" )
 if [[ $CONDA_SUBDIR == "osx-arm64" ]]
 then
     SPEC_POSTGRES="postgresql>=17,<18"
