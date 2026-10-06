@@ -63,10 +63,10 @@ do-download()
   log "DOWNLOADS OK."
 }
 
-report-disk-space()
+report-disk-usage()
 {
   print
-  log "DISK SPACE: WORKSPACE:"
+  log "DISK USAGE: WORKSPACE:"
   tm du -sh $WORKSPACE
   print
 }
@@ -99,6 +99,8 @@ if [[ -d $TARGET ]] {
   log "INSTALL OK: $TARGET"
 }
 
-report-disk-space
+conda info |& grep cache
+
+report-disk-usage
 
 log "DONE."
