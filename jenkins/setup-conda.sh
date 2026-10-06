@@ -34,7 +34,7 @@ help()
 EOF
 }
 
-tm()
+ti()
 {
   =time --format "TIME: %E" ${*}
 }
@@ -67,7 +67,7 @@ report-disk-usage()
 {
   print
   log "DISK USAGE: WORKSPACE:"
-  tm du -sh $WORKSPACE
+  ti du -sh $WORKSPACE
   print
 }
 

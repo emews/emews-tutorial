@@ -11,7 +11,7 @@ log()
   print ${(%)DATE_FMT_NICE} "install.sh:" ${*}
 }
 
-tm()
+ti()
 {
   =time --format "TIME: %E" ${*}
 }
@@ -20,7 +20,7 @@ report-disk-space()
 {
   print
   log "DISK SPACE: WORKSPACE:"
-  tm du -sh $WORKSPACE
+  ti du -sh $WORKSPACE
   print
 }
 
