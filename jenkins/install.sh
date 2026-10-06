@@ -24,6 +24,12 @@ report-disk-space()
   print
 }
 
+TRAPTERM()
+{
+  log "TRAPTERM: Job canceled."
+  print
+}
+
 log "JENKINS INSTALL SH"
 
 THIS=${0:h:A}
