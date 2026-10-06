@@ -91,6 +91,7 @@ mkdir -pv $WORKSPACE/downloads
 if (( ${#UNINSTALL} )) uninstall
 do-download
 
+set -x
 if [[ -d $TARGET ]] {
   log "Installation exists: $TARGET"
 } else {
