@@ -91,16 +91,16 @@ mkdir -pv $WORKSPACE/downloads
 if (( ${#UNINSTALL} )) uninstall
 do-download
 
-set -x
 if [[ -d $TARGET ]] {
   log "Installation exists: $TARGET"
 } else {
   log "INSTALL ..."
-  bash downloads/$MINICONDA_SH -b -p $TARGET
+  ti bash downloads/$MINICONDA_SH -b -p $TARGET
   log "INSTALL OK: $TARGET"
 }
 
-conda info |& grep cache
+$TARGET/bin/conda info
+$TARGET/bin/conda info |& grep cache || true
 
 report-disk-usage
 
