@@ -11,5 +11,7 @@ import R;
 
 trace(
   R("library(lattice)",
-    "toString(level.colors(c(1,2,3), c(1,2,3)))")
+    "toString(level.colors(c(1,2,3), c(1,2,3)))"
+    // "toString(4)"
+    )
       );

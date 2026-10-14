@@ -2,16 +2,28 @@
 # Postpone 'set -eu' for conda activate below
 # Use bash, not ZSH, because we may be running in a
 #     raw GitHub environment
+# See help()
 
 # TEST SWIFT-T
-# Test Swift/T under GitHub Actions or Jenkins
-# Provide Python version as MAJOR.MINOR
-# Provide -E to skip activating an environment
-#         This is good for interactive use
-#         when an environment is already activated.
-# Provide -M to turn on Makevars (fixes build errors on Mac)
-# Provide -I to skip installing R packages
-# Provide -R to skip testing R cases
+
+help()
+{
+    cat <<EOF
+
+Test Swift/T under GitHub Actions or Jenkins
+
+Provide Python version as MAJOR.MINOR
+Provide -E to skip activating an environment
+        This is good for interactive use
+        when an environment is already activated.
+Provide -M to turn on Makevars (fixes build errors on Mac)
+Provide -I to skip installing R packages
+Provide -R to skip testing R cases
+
+If you get link-time errors for R pkgs on Mac, try -M
+
+EOF
+}
 
 log()
 {
@@ -29,9 +41,10 @@ USE_R=1
 CONDA_LABEL_DEFAULT=26.1.1-1
 : ${CONDA_LABEL:=$CONDA_LABEL_DEFAULT}
 
-while getopts "EIMR" option
+while getopts "hEIMR" option
 do
     case $option in
+      h) help ; exit    ;;
       E) USE_ENV=0      ;;
       I) DO_INSTALL=0   ;;
       M) USE_MAKEVARS=1 ;;
@@ -66,11 +79,13 @@ else
     AUTO_TEST=""
 fi
 
+# Find CONDA_BIN_DIR:
 if [[ $AUTO_TEST == "Jenkins" ]]
 then
     # CELS Jenkins environment
     CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/sfw/Miniconda-311_${CONDA_LABEL}/bin
-    PATH=${CONDA_BIN_DIR:a}:$PATH
+    CONDA_BIN_DIR=$( realpath --canonicalize $CONDA_BIN_DIR )
+    PATH=$CONDA_BIN_DIR:$PATH
 elif [[ $AUTO_TEST == "GitHub" ]]
 then
     # The installation is a bit different on GitHub
@@ -87,6 +102,7 @@ else
     CONDA_EXE=$(which conda)
     CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
     CONDA_BIN_DIR=$CONDA_HOME/bin
+    PATH=$CONDA_BIN_DIR:$PATH
 fi
 
 ## Some important steps:
