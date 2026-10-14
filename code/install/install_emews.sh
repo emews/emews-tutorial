@@ -220,7 +220,9 @@ echo "Using conda bin: $CONDA_BIN_DIR"
 ENV_NAME=emews-py${PY_VERSION}
 TEXT="Creating conda environment '${ENV_NAME}' using Python ${PY_VERSION}"
 start_step "$TEXT"
-conda create -y $QUIET -n $ENV_NAME python=${PY_VERSION} >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# Must pin conda-forge here, not just below for eq-r/R/swift-t
+# to avoid mixing the defaults-channel base env with conda-forge packages
+conda create -y $QUIET -n $ENV_NAME -c conda-forge python=${PY_VERSION} >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 TEXT="Activating conda environment"
