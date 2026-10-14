@@ -296,13 +296,6 @@ then
         set -x
         which R
         R --version
-    )
-fi
-
-if (( RUN_TESTS ))
-then
-    (
-        set -x
         swift-t -v
         swift-t -E 'trace(42);'
     )
