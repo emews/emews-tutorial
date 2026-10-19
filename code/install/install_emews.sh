@@ -8,34 +8,52 @@ if (( ${#JENKINS_URL} > 0 ))
 then
     echo "install_emews.sh: detected auto test Jenkins"
     AUTO_TEST="Jenkins"
-elif (( ${#GITHUB_ACTION} > 0))
+elif [[ ${GITHUB_ACTIONS:-false} == true ]]
 then
     echo "install_emews.sh: detected auto test GitHub"
     AUTO_TEST="GitHub"
 else
-    # Other- possibly interactive user run.  Set to empty string.
+    # Other- probably interactive user run.  Set to empty string.
     AUTO_TEST=""
 fi
 
 function start_step {
+    # Produces output for a new installation step
     if (( ! ${#AUTO_TEST} ))
     then
         # Normal shell run
         echo -en "[ ] $1 "
-    else
-        # Auto test run
+    elif [[ $AUTO_TEST == "Jenkins" ]]
+    then
         echo -e  "[ ] $1 "
+    elif [[ $AUTO_TEST == "GitHub" ]]
+    then
+        # Duplicate output to visible output and log
+        echo -e "[ ] $1 "
+        echo -e "[ ] $1 " >> "$EMEWS_INSTALL_LOG"
+    else
+        echo "Invalid AUTO_TEST=$AUTO_TEST"
+        exit 1
     fi
 }
 
 function end_step {
+    # Produces output to end an installation step
     if (( ! ${#AUTO_TEST} ))
     then
         # Normal shell run - overwrite last line and show check mark
         echo -e "\r[\xE2\x9C\x94] $1 "
-    else
-        # Auto test run
+    elif [[ $AUTO_TEST == "Jenkins" ]]
+    then
         echo -e "[X] $1 "
+    elif [[ $AUTO_TEST == "GitHub" ]]
+    then
+        # Duplicate output to visible output and log
+        echo -e "[X] $1 "
+        echo -e "[X] $1 " >> "$EMEWS_INSTALL_LOG"
+    else
+        echo "Invalid AUTO_TEST=$AUTO_TEST"
+        exit 1
     fi
 }
 
@@ -63,11 +81,14 @@ function on_error {
     exit 1
 }
 
-VALID_VERSIONS=("3.8" "3.9" "3.10" "3.11" "3.12" "3.13" "3.14")
+# Sync versions with README
+VALID_VERSIONS=("3.11" "3.12" "3.13" "3.14")
 V_PREFIX=(${VALID_VERSIONS[@]::${#VALID_VERSIONS[@]}-1})
 V_SUFFIX="${VALID_VERSIONS[@]: -1}"
 printf -v joined '%s, ' "${V_PREFIX[@]}"
 V_STRING="${joined% } or $V_SUFFIX"
+
+EQ_R_VERSION=1.3
 
 help() {
    echo "Usage: install_emews.sh <python-version> <database-directory>"
@@ -75,6 +96,11 @@ help() {
    echo
    echo "Arguments:"
    echo "  -h                     display this help and exit"
+   echo "  -k                     keep   any existing DB"
+   echo "  -r                     remove any existing DB"
+   echo "  -q                     quieter: pass -q to conda install"
+   echo "  -t                     run additional short tests"
+   echo "  -v                     verbose mode for debugging"
    echo "  python-version         python version to use ($V_STRING)"
    echo "  database-directory     EQ/SQL Database installation directory"
    echo
@@ -82,25 +108,51 @@ help() {
    echo "  install_emews.sh 3.11 ~/Documents/db/eqsql_db"
 }
 
-while getopts ":h" option; do
+# Default: Tests off
+# It is good to be able to run short tests
+# before the long install_pkgs.R step
+RUN_TESTS=0
+
+# Default: Not verbose
+# Turning this on reports intermediate Anaconda package lists
+VERBOSE=0
+
+# Default: If the DB exists, that is an ERROR.
+# Other possibilities:
+# -k : KEEP:   Keeps an existing DB
+# -r : REMOVE: Removes and re-makes the DB
+DB_EXISTENCE=ERROR
+# Remember if we found an existing DB: Do not try to init it:
+DB_KEPT=0
+
+while getopts ":hkrqtv" option; do
    case $option in
-      h) # display Help
+      h) # display user help
          help
-         exit;;
+         exit                ;;
+      k) DB_EXISTENCE=KEEP   ;;
+      r) DB_EXISTENCE=REMOVE ;;
+      q) QUIET="-q"          ;;
+      t) RUN_TESTS=1         ;;
+      v) VERBOSE=1           ;;
       \?) # incorrect option
          help
-         exit;;
+         exit 1              ;;
    esac
 done
+shift $(( OPTIND - 1 ))
 
 if [ "$#" -ne 2 ]; then
     help
-    exit
+    # Invalid argument count is an error:
+    exit 1
 fi
+ARG_PV=$1
+ARG_DB=$2
 
 PY_VERSION=''
 for V in "${VALID_VERSIONS[@]}"; do
-    if [ $V = $1 ]; then
+    if [ $V = $ARG_PV ]; then
         PY_VERSION=$V
     fi
 done
@@ -110,13 +162,26 @@ if [ -z "$PY_VERSION" ]; then
     exit 1
 fi
 
-if [ -d $2 ]; then
-    echo "Error: Database directory already exists: $2"
-    echo "       This script will not overwrite an existing database."
-    echo "       Remove it or specify a different directory."
-    exit 1
+if [ -d $ARG_DB ]; then
+    echo "Database directory already exists: $ARG_DB"
+    case $DB_EXISTENCE in
+      KEEP)
+        echo "Keeping the DB."
+        DB_KEPT=1                 ;;
+      REMOVE)
+        echo "Deleting the DB..."
+        rm -r $ARG_DB             ;;
+      ERROR)
+        echo "Error:"
+        echo "By default, this script will not overwrite" \
+             "an existing database."
+        echo "Remove it or specify a different directory."
+        exit 1                    ;;
+      *)
+        echo "Internal error."
+        exit 1                    ;;
+    esac
 fi
-
 
 if [ ! $(command -v conda) ]; then
     echo "Error: conda executable not found. Conda must be activated."
@@ -143,7 +208,12 @@ EMEWS_INSTALL_LOG="$THIS/emews_install.log"
 OS=$( uname -o )
 
 echo "Starting EMEWS stack installation"
-echo "See ${THIS}/emews_install.log for detailed output."
+echo "See detailed output in: ${THIS}/emews_install.log"
+if [[ -f ${THIS}/emews_install.log ]]
+then
+    echo "Resetting log..."
+    echo > ${THIS}/emews_install.log
+fi
 echo
 
 echo "Using conda bin: $CONDA_BIN_DIR"
@@ -151,7 +221,9 @@ echo "Using conda bin: $CONDA_BIN_DIR"
 ENV_NAME=emews-py${PY_VERSION}
 TEXT="Creating conda environment '${ENV_NAME}' using Python ${PY_VERSION}"
 start_step "$TEXT"
-conda create -y -n $ENV_NAME python=${PY_VERSION} > "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+# Must pin conda-forge here, not just below for eq-r/R/swift-t
+# to avoid mixing the defaults-channel base env with conda-forge packages
+conda create -y $QUIET -n $ENV_NAME -c conda-forge python=${PY_VERSION} >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
 TEXT="Activating conda environment"
@@ -159,7 +231,6 @@ if (( ${#AUTO_TEST} ))
 then
     echo "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
 fi
-
 start_step "$TEXT"
 ACTIVATE=$CONDA_BIN_DIR/activate
 if ! [[ -f $ACTIVATE ]]
@@ -185,59 +256,137 @@ then
     echo "conda:   " $(which conda)
 fi
 
-# !! conda activate $ENV_NAME doesn't work within the script
-TEXT="Installing swift-t conda package"
+function conda-list
+# If VERBOSE, debug conda state during installations
+{
+    if (( ! VERBOSE ))
+    then
+        return
+    fi
+    {
+        echo
+        echo "conda-list:" ${*}
+        echo
+        conda list 2>&1
+        echo
+    } >> "$EMEWS_INSTALL_LOG"
+}
+
+conda-list 1
+
+# Detect the conda platform once; used below to select platform-specific
+# package specs (emews-r and PostgreSQL).  These are python-independent,
+# so the same specs apply to all supported Python versions.
+CONDA_SUBDIR=$( conda info --json 2>/dev/null \
+                | python -c "import json,sys; print(json.load(sys.stdin).get('platform',''))" )
+
+# emews-r is our custom R build, only on osx-arm64 (other platforms use the
+# community 'r').  Pin it to >=9: earlier builds baked a stale gfortran path
+# into R's FLIBS, so R package builds failed with '-lemutls_w'.  eq-r pulls
+# emews-r transitively and unpinned, so without this the solver may select an
+# old, broken emews-r (e.g. 7).
+if [[ $CONDA_SUBDIR == "osx-arm64" ]]
+then
+    SPEC_EMEWS_R="emews-r>=9"
+else
+    SPEC_EMEWS_R=""
+fi
+
+# EQ-R depends on Swift/T and R, so that is all we need to specify
+#      to Anaconda.  2025-05-08
+TEXT="Installing EMEWS Queues for R (EQ/R)"
 start_step "$TEXT"
-conda install -y -c conda-forge -c swift-t swift-t-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-conda deactivate
-source $CONDA_BIN_DIR/activate $ENV_NAME
+conda install -y $QUIET -c conda-forge -c swift-t eq-r=$EQ_R_VERSION $SPEC_EMEWS_R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-TEXT="Installing EMEWS Queues for R"
-start_step "$TEXT"
-conda install -y -c conda-forge -c swift-t eq-r >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-end_step "$TEXT"
+conda-list 2
 
-if [[ $OS != "Darwin" ]]
+if (( RUN_TESTS ))
+then
+    (
+        set -x
+        which R
+        R --version
+        swift-t -v
+        swift-t -E 'trace(42);'
+    )
+fi
+
+if [[ $AUTO_TEST == "Jenkins" ]]
 then
     GCC_VERSION=12.3.0
     TEXT="Installing gcc==$GCC_VERSION"
     # Upgrades from 11.2.0 to 12.3.0 on GCE Jenkins (Ubuntu 20) (2024-06-11)
     start_step "$TEXT"
-    conda install -y -c conda-forge gcc==$GCC_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+    conda install -y $QUIET -c conda-forge gcc==$GCC_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
     end_step "$TEXT"
 fi
 
-TEXT="Installing PostgreSQL"
+conda-list 4
+
+# PostgreSQL version depends on platform (CONDA_SUBDIR set above).
+# See code/install/README.adoc.
+# linux-aarch64: pin to 14.12; later conda-forge builds crash there.
+# osx-arm64: our custom emews-r (>=9) pulls cairo>=1.18.6 -> icu>=78, which
+#   conflicts with the libxml2 required by postgresql 14.12 (icu<=75).  Use a
+#   newer PostgreSQL that is compatible with the newer icu.  PostgreSQL is
+#   python-independent, so this is unaffected by the Python version.
+if [[ $CONDA_SUBDIR == "osx-arm64" ]]
+then
+    SPEC_POSTGRES="postgresql>=17,<18"
+else
+    SPEC_POSTGRES="postgresql==14.12"
+fi
+
+TEXT="Installing PostgreSQL ($SPEC_POSTGRES)"
 start_step "$TEXT"
-conda install -y -c conda-forge postgresql==14.12 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+conda install -y $QUIET -c conda-forge $SPEC_POSTGRES >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
+
+conda-list 5
 
 TEXT="Installing EMEWS Creator"
 start_step "$TEXT"
 pip install emewscreator >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
+if [[ $AUTO_TEST == "Jenkins" ]]
+then
+    # See README.  Sync this with test-swift-t.sh
+    COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
+    export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
+    echo "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+fi
+
+if (( ! DB_KEPT ))
+then
 TEXT="Initializing EMEWS Database"
 start_step "$TEXT"
 emewscreator init_db -d $2 >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
-
-THIS=$( cd $( dirname $0 ) ; /bin/pwd )
+fi
 
 echo
 echo "Using Rscript: $(which Rscript)" 2>&1 | tee -a "$EMEWS_INSTALL_LOG"
 
-TEXT="Installing R package dependencies"
+TEXT="Downloading EMEWS R package installer"
 start_step "$TEXT"
-Rscript $THIS/install_pkgs.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+curl -L -O https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_list.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
 end_step "$TEXT"
 
-# Moved into install_pkgs.R
-# TEXT="Installing R EQ.SQL"
-# start_step "$TEXT"
-# Rscript $THIS/install_eq_sql.R >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-# end_step "$TEXT"
+TEXT="Installing R package dependencies"
+start_step "$TEXT"
+# R-pkgs.txt is the list of R package names:
+cat <<EOF > $THIS/R-pkgs.txt
+coro
+jsonlite
+purrr
+logger
+remotes
+Rcpp
+EOF
+Rscript $THIS/install_list.R $THIS/R-pkgs.txt >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+end_step "$TEXT"
 
 echo
 echo "#"
@@ -258,6 +407,77 @@ echo "#"
 echo "# To deactivate an active environment, use"
 echo "#"
 echo "#     $ conda deactivate"
+
+if (( RUN_TESTS ))
+then
+    (
+        # Quick probe of new installation
+        # Merge stderr to stdout:
+        exec 2>&1
+        echo TEST-ACTIVATE $ENV_NAME ...
+        if ! conda activate $ENV_NAME
+        then
+            echo "Error: could not activate '$ENV_NAME'"
+            exit 1
+        fi
+        echo TEST-ACTIVATE $ENV_NAME OK
+        echo CONDA_PREFIX=$CONDA_PREFIX
+        conda list
+        set -x
+        # ls $CONDA_PREFIX/lib
+        if [[ $OS != "Darwin" ]]
+        then
+            ldd $CONDA_PREFIX/lib/libeqr.so
+        else
+            ls -l $CONDA_PREFIX/lib/libeqr.so
+        fi
+    ) >> "$EMEWS_INSTALL_LOG"
+fi
+
+if [[ $AUTO_TEST == "GitHub" ]]
+then
+    echo "creating $PWD / gh-run"
+    # On GitHub, create a runner script 'gh-run' for testing
+    # Currently has an "orphan process" issue on GitHub
+    {
+        cat <<EOF
+#!/bin/bash
+# This script loads up the Conda environment,
+# then runs the user command
+exec 2>&1
+echo
+echo GH-RUN: command: \${@}
+echo
+if [[ $RUNNER_OS == Linux ]]
+then
+    echo GH-RUN: not running on Linux
+    exit
+fi
+echo source conda.sh
+source $CONDA_PREFIX/../../etc/profile.d/conda.sh
+echo  activate $ENV_NAME
+conda activate $ENV_NAME
+conda list
+set -eux
+which python conda
+which swift-t
+set -x
+ls $CONDA_PREFIX/lib/EQR.swift
+ls $CONDA_PREFIX/lib/libeqr.so
+"\${@}"
+EOF
+    } >> gh-run
+    echo "contents of gh-run start:"
+    cat gh-run
+    echo "contents of gh-run stop."
+    chmod -v u+x gh-run
+fi
+
+{
+    echo
+    echo "INSTALL SUCCESS."
+} | tee -a "$EMEWS_INSTALL_LOG"
+
 
 # Local Variables:
 # sh-basic-offset: 4
