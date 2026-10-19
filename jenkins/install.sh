@@ -11,6 +11,25 @@ log()
   print ${(%)DATE_FMT_NICE} "install.sh:" ${*}
 }
 
+ti()
+{
+  =time --format "TIME: %E" ${*}
+}
+
+report-disk-space()
+{
+  print
+  log "DISK SPACE: WORKSPACE:"
+  ti du -sh $WORKSPACE
+  print
+}
+
+TRAPTERM()
+{
+  log "TRAPTERM: Job canceled."
+  print
+}
+
 log "JENKINS INSTALL SH"
 
 THIS=${0:h:A}
@@ -19,7 +38,7 @@ WORKSPACES=${EMEWS:h}
 
 # Defaults:
 PYTHON_VERSION=${PYTHON_VERSION:-311}
-CONDA_LABEL=${CONDA_LABEL:-23.11.0-1}
+CONDA_LABEL=${CONDA_LABEL:-26.1.1-1}
 DB=$WORKSPACE/DB
 
 # Main argument processing
@@ -27,7 +46,7 @@ zparseopts -D -E -F c:=CL p:=PV u=UNINSTALL
 if (( ${#PV} )) PYTHON_VERSION=${PV[2]}
 if (( ${#CL} )) CONDA_LABEL=${CL[2]}
 
-MINICONDA=$WORKSPACES/EMEWS-Conda/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
+MINICONDA=$WORKSPACES/EMEWS-Conda/sfw/Miniconda-${PYTHON_VERSION}_${CONDA_LABEL}
 log "MINICONDA: $MINICONDA"
 if [[ ! -d $MINICONDA ]] {
   log "Not found: MINICONDA=$MINICONDA"
@@ -45,10 +64,15 @@ if [[ -d $DB ]] {
   log "Removing existing DB=$DB"
   rm -rf $DB
 }
+
 (
+  # Install it!
   set -x
   which python conda
-  $EMEWS/code/install/install_emews.sh $PV_DOT $DB
+  $EMEWS/code/install/install_emews.sh -t $PV_DOT $DB
 )
+
 log "INSTALL SUCCESS"
 print
+
+report-disk-space

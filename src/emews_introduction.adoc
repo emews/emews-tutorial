@@ -109,12 +109,11 @@ you do not have an existing conda installation. For the differences between the 
 +
 NOTE: For more information on conda enviroments see https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html[here]
 
-. *Download the installer files*
+. *Download the installer file*
 +
 [source, bash]
 ----
-$ curl -L -O https://raw.githubusercontent.com/jozik/emews_next_gen_tutorial_tests/main/code/install/install_emews.sh
-$ curl -L -O https://raw.githubusercontent.com/jozik/emews_next_gen_tutorial_tests/main/code/install/install_pkgs.R
+$ curl -L -O https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_emews.sh
 ----
 
 . *Run the Installer*
@@ -134,7 +133,7 @@ The install script, `install_emews.sh`, takes two arguments:
 $ bash install_emews.sh <python-version> <database-directory>
 ----
 +
-  .. The Python version to use - one of 3.8, 3.9, 3.10, or 3.11
+  .. The Python version to use is one of the <<binary_install_versions,supported versions>> for the binary install.
   .. The EMEWS DB database install directory - this must *NOT* already exist
 +
 The install will take a few minutes to download and install the necessary components,

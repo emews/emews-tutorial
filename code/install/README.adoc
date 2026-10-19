@@ -19,15 +19,25 @@ $ install_emews.sh -h
 
 for help.
 
-The packages will be installed in a Conda environment named `emews-py${PY_VERSION}` , where `PY_VERSION` is one of `"3.8" "3.9" "3.10" "3.11"`.
+The packages will be installed in a Conda environment named `emews-py${PY_VERSION}` , where `PY_VERSION` is one of `"3.11" "3.12" "3.13" "3.14"`.
 
 Use `conda activate` to activate the installed environment.
 
 == Testing
 
+=== Jenkins
+
 This script is tested weekly at:
 
 https://jenkins.cels.anl.gov/user/woz/my-views/view/EMEWS/job/EMEWS-Install
+
+NOTE: This configuration sets `GITHUB_PAT=ghp_ABC123...` in the Jenkins Pipeline Script.
+
+=== GitHub Actions
+
+This script is tested by a GitHub action on push.
+
+NOTE: This configuration sets `GITHUB_PAT=secrets.GH_PAT_WOZ` via `~/.Renviron` in the YAML scripts.
 
 == Modules
 
@@ -46,12 +56,44 @@ $ Rscript install_pkgs.R
 
 Cf. <<Reticulate>>
 
+=== Install via GitHub
+
+When run under GitHub Actions, `install_github()` requires a GitHub Personal Access Token.
+In this case, we set a secret for `GITHUB_PAT`.  See the Testing section.
+
+More info: https://snyk.io/blog/how-to-use-github-actions-environment-variables
+
 == Known complexities
 
 === Postgres Version
 
+The PostgreSQL version is selected per-platform in `install_emews.sh`
+(`SPEC_POSTGRES`, keyed on the conda subdir).  PostgreSQL is
+python-independent, so the same spec covers all supported Python versions.
+
+==== linux-aarch64
+
 Postgres has been pinned to 14.12 as later versions on conda-forge crash
 on linux-aarch64
+
+==== osx-arm64
+
+Postgres uses `postgresql>=17,<18` here, not 14.12.  Our custom-built
+`emews-r` (>=9) depends on `cairo>=1.18.6`, which requires `icu>=78`.
+PostgreSQL 14.12 pulls in a `libxml2` that caps `icu<=75`, so it cannot
+coexist with `emews-r` 9.  A newer PostgreSQL is compatible with the newer
+`icu` and resolves the conflict.
+
+==== GCE
+
+Must set `LD_LIBRARY_PATH` to `$CONDA_PREFIX/x86_64-conda-linux-gnu/lib`
+or you will get problems with emewscreator/initdb like:
+
+----
+ValueError: EQ/SQL create database failed:/tmp/woz/Miniconda-311-X/bin/postgres: /lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.30' not found
+----
+
+This is needed for Postgres and Swift/T itself, so it is used in `install_emews.sh` and `test-swift-t.sh`.
 
 === GCC version
 
@@ -64,7 +106,7 @@ conda upgrade -y -c conda-forge gcc
 or we will get an error like this from reticulate and GCC 11:
 
 ----
-* installing *source* package 'reticulateâ€™ ...
+* installing *source* package 'reticulate' ...
 ** package 'reticulate' successfully unpacked and MD5 sums checked
 ** using staged installation
 ** libs
@@ -96,6 +138,58 @@ Cf. https://github.com/satijalab/seurat/issues/5650
 
 This is handled by `install_pkgs.R`, see <<R packages>>.
 
+=== Corrupted conda cache (macOS)
+
+On macOS, the install may fail at the final "Installing R package dependencies"
+step with a `dyld` crash:
+
+----
+dyld: Library not loaded: @rpath/libomp.dylib
+  Referenced from: .../conda-cache/emews-r-N-1/lib/R/bin/exec/R
+----
+
+This is caused by a corrupted `emews-r` package in the conda package cache.
+Earlier in the log you will also see:
+
+----
+SafetyError: The package for emews-r ... appears to be corrupted.
+The path 'lib/R/doc/html/packages.html' has an incorrect size.
+----
+
+followed by several `ClobberError`s (path collisions for `xorg-xorgproto`,
+`xorg-libx11`, `libsqlite` against the already-installed `tk`). The corrupt
+transaction leaves `libomp.dylib` misplaced, so R crashes and the R packages
+are never installed.
+
+Root cause: conda installs cache files into the environment as *hardlinks*
+(shared inode). R regenerates `lib/R/doc/html/packages.html` at runtime when
+packages are installed, and that write propagates back through the hardlink and
+mutates the integrity-tracked copy in the conda cache. The next conda
+transaction then detects the mismatch.
+
+NOTE: The installer may still print `INSTALL SUCCESS` even when this step
+failed. Verify the R packages actually loaded by checking for
+`LOAD OK: [6/6]` in `emews_install.log`, or run
+`Rscript -e 'rownames(installed.packages())'`.
+
+Fix: remove the corrupt cache package(s), then reinstall. The helper script
+`clean_conda_cache.py` scans the conda package cache and removes any extracted
+package whose files no longer match its `info/paths.json` integrity data:
+
+----
+# Report corrupt packages (dry run):
+$ ./clean_conda_cache.py
+# Remove them:
+$ ./clean_conda_cache.py --delete
+----
+
+Then remove the environment and re-run the installer:
+
+----
+$ conda env remove -n emews-py${PY_VERSION}
+$ ./install_emews.sh -k ${PY_VERSION} <database-directory>
+----
+
 == Developer details
 
-When running under Jenkins, we simplify the output for compatibility with the web browser interface, and do not use emojis or carriage returns.
+When running under automated testing (GitHub or Jenkins), i.e. `AUTO_TEST`, we simplify the output for compatibility with the web browser interface, and do not use emojis or carriage returns.

@@ -1,60 +1,206 @@
 #!/bin/bash
+# Postpone 'set -eu' for conda activate below
+# Use bash, not ZSH, because we may be running in a
+#     raw GitHub environment
+# See help()
 
 # TEST SWIFT-T
-# Test Swift/T under GitHub Actions or Jenkins
 
-echo "test-swift-t.sh: START"
+help()
+{
+    cat <<EOF
+
+Test Swift/T under GitHub Actions or Jenkins
+
+Provide Python version as MAJOR.MINOR
+Provide -E to skip activating an environment
+        This is good for interactive use
+        when an environment is already activated.
+Provide -M to turn on Makevars (fixes build errors on Mac)
+Provide -I to skip installing R packages
+Provide -R to skip testing R cases
+
+If you get link-time errors for R pkgs on Mac, try -M
+
+EOF
+}
+
+log()
+{
+  echo "test-swift-t.sh:" ${*}
+}
+
+log "START: $( date "+%Y-%m-%d %H:%M" )"
+log "ARGS: ${*}"
+
+# Defaults:
+USE_ENV=1
+DO_INSTALL=1
+USE_MAKEVARS=0
+USE_R=1
+CONDA_LABEL_DEFAULT=26.1.1-1
+: ${CONDA_LABEL:=$CONDA_LABEL_DEFAULT}
+
+while getopts "hEIMR" option
+do
+    case $option in
+      h) help ; exit    ;;
+      E) USE_ENV=0      ;;
+      I) DO_INSTALL=0   ;;
+      M) USE_MAKEVARS=1 ;;
+      R) USE_R=0        ;;
+      *) # Bash prints an error message
+         exit 1 ;;
+    esac
+done
+shift $(( OPTIND - 1 ))
 
 if (( ${#} != 1 ))
 then
-    echo "test-swift-t.sh: Provide Python version!"
+    log "Provide Python version!"
     exit 1
 fi
 
 PY_VERSION=$1
-
+log "PY_VERSION=$PY_VERSION"
 THIS=$( dirname $0 )
 
+# Are we running under an automated testing environment?
 if (( ${#JENKINS_URL} > 0 ))
 then
+    log "detected auto test Jenkins"
+    AUTO_TEST="Jenkins"
+elif [[ ${GITHUB_ACTIONS:-false} == true ]]
+then
+    log "detected auto test GitHub"
+    AUTO_TEST="GitHub"
+else
+    # Other- possibly interactive user run.  Set to empty string.
+    AUTO_TEST=""
+fi
+
+# Find CONDA_BIN_DIR:
+if [[ $AUTO_TEST == "Jenkins" ]]
+then
     # CELS Jenkins environment
-    PATH=$WORKSPACE/../EMEWS-Conda/Miniconda-311_23.11.0-1/bin:$PATH
-    # Otherwise, we are on GitHub, and GitHub provides python, conda
+    CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/sfw/Miniconda-311_${CONDA_LABEL}/bin
+    CONDA_BIN_DIR=$( realpath --canonicalize $CONDA_BIN_DIR )
+    PATH=$CONDA_BIN_DIR:$PATH
+elif [[ $AUTO_TEST == "GitHub" ]]
+then
+    # The installation is a bit different on GitHub
+    # conda    is in $CONDA_HOME/condabin
+    # activate is in $CONDA_HOME/bin
+    CONDA_EXE=$(which conda)
+    CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
+    CONDA_BIN_DIR=$CONDA_HOME/bin
+
+    # Placeholder with no content:
+    echo > test.log
+else
+    # Assume user set up Anaconda!
+    CONDA_EXE=$(which conda)
+    CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
+    CONDA_BIN_DIR=$CONDA_HOME/bin
+    PATH=$CONDA_BIN_DIR:$PATH
 fi
 
-ENV_NAME=emews-py${PY_VERSION}
+## Some important steps:
 
-CONDA_EXE=$(which conda)
-# The installation is a bit different on GitHub
-# conda    is in $CONDA_HOME/condabin
-# activate is in $CONDA_HOME/bin
-CONDA_HOME=$(dirname $(dirname $CONDA_EXE))
-CONDA_BIN_DIR=$CONDA_HOME/bin
+R_install()
+{
+    Rscript $THIS/../code/install/install_list.R ${*}
+}
 
-echo "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
-if ! [[ -f $CONDA_BIN_DIR/activate ]]
+setup_mac_makevars()
+# Fix the build environment for GH/Mac
+# Cf. https://stackoverflow.com/questions/76096681/macos-brew-system-r-packages-fail-to-install-with-emutls-w
+{
+    # NOTE: As of emews-r 9, R's own FLIBS (in lib/R/etc/Makeconf) points at
+    # the correct, pinned gcc lib dir, so this Makevars hack should no longer
+    # be needed to fix the '-lemutls_w' build error.  It is retained only as
+    # an escape hatch (-M) for unusual environments.
+    # Set up GCC version: auto-detect it rather than hard-coding, so a stale
+    # version string can never inject a non-existent -L path.
+    log "setup_mac_makevars: probe GCC libs:"
+    echo $CONDA_PREFIX/lib/gcc/arm64-*/*
+    local GCC_ARCH_DIR GCC_REL
+    GCC_ARCH_DIR=$( ls -d $CONDA_PREFIX/lib/gcc/arm64-*/ 2>/dev/null | head -1 )
+    if [[ -z $GCC_ARCH_DIR ]]
+    then
+        log "setup_mac_makevars: no gcc lib dir found; skipping."
+        return
+    fi
+    # GCC_REL is e.g. 'arm64-apple-darwin20.0.0/16.2.0'
+    GCC_REL=${GCC_ARCH_DIR#$CONDA_PREFIX/lib/gcc/}
+    GCC_REL=${GCC_REL%/}
+    log "setup_mac_makevars: detected GCC_REL=$GCC_REL"
+
+    # Create/overwrite Makevars.  Overwrite (not append) so repeated runs
+    # cannot accumulate stale -L paths from old environments.
+    MAKEVARS=$HOME/.R/Makevars
+    log "setup_mac_makevars: writing $MAKEVARS"
+    mkdir -pv ~/.R
+    if [[ -e $MAKEVARS ]]
+    then
+        # Assume GNU coreutils:
+        cp -v --backup=numbered $MAKEVARS $MAKEVARS.bak
+    fi
+    printf "LDFLAGS += -L %s/lib/gcc/%s\n" \
+           $CONDA_PREFIX $GCC_REL          > $MAKEVARS
+    log "setup_mac_makevars: Makevars contents:"
+    cat $MAKEVARS
+    log "setup_mac_makevars: OK"
+}
+
+# Optionally activate the environment in which EMEWS was installed:
+if (( USE_ENV ))
 then
-    echo "File not found: '$CONDA_BIN_DIR/activate'"
-    exit 1
-fi
-if ! source $CONDA_BIN_DIR/activate $ENV_NAME
-then
-    echo "could not activate: $ENV_NAME"
-    exit 1
+    ENV_NAME=emews-py${PY_VERSION}
+
+    log "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
+    if ! [[ -f $CONDA_BIN_DIR/activate ]]
+    then
+        log "File not found: '$CONDA_BIN_DIR/activate'"
+        exit 1
+    fi
+    if ! source $CONDA_BIN_DIR/activate $ENV_NAME
+    then
+        log "could not activate: $ENV_NAME"
+        exit 1
+    fi
 fi
 
 set -eu
 
+if [[ $AUTO_TEST == "Jenkins" ]]
+then
+    # See code/install/README.  Sync this with install_emews.sh
+    COLON=${LD_LIBRARY_PATH:+:} # Conditional colon
+    export LD_LIBRARY_PATH=$CONDA_PREFIX/x86_64-conda-linux-gnu/lib$COLON${LD_LIBRARY_PATH:-}
+    log "Setting LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+fi
+
 PYTHON_EXE=$(which python)
 ENV_HOME=$(dirname $(dirname $PYTHON_EXE))
 
-echo "python:  " $PYTHON_EXE
-echo "version: " $(python -V)
-echo "conda:   " $(which conda)
-echo "env:     " $ENV_HOME
+log "python:  " $PYTHON_EXE
+log "version: " $(python -V)
+log "conda:   " $(which conda)
+log "env:     " $ENV_HOME
+log "Rscript: " $(which Rscript)
+log "version: " $(Rscript --version)
 
 # EQ/R files EQR.swift and pkgIndex.tcl should be under ENV/lib:
 SWIFT_LIBS=$ENV_HOME/lib
+
+# As of emews-r 9, R's FLIBS is correct and the Makevars workaround is no
+# longer needed, so it is no longer enabled automatically (not even on GitHub
+# macOS).  Use -M explicitly if an environment still needs it.
+if (( $USE_MAKEVARS ))
+then
+    setup_mac_makevars
+fi
 
 # Run tests!
 
@@ -62,16 +208,47 @@ export TURBINE_RESIDENT_WORK_WORKERS=1
 FLAGS=( -n 4 -I $SWIFT_LIBS -r $SWIFT_LIBS )
 
 (
-    set -x
-    which swift-t
-    swift-t -v
-    swift-t -E 'trace(42);'
-    swift-t ${FLAGS[@]} -E 'import EQR;'
-    swift-t ${FLAGS[@]} $THIS/test-eqr-1.swift
+    # Subshells for 'set -x' and exit from R tests
+    (
+        set -x
+        which swift-t
+        swift-t -v
+        swift-t -E 'trace(42);'
+    )
+    if (( ! USE_R ))
+    then
+        log "skipping R tests."
+        exit # from subshell
+    fi
+    if (( DO_INSTALL ))
+    then
+        (
+            set -x
+            R_install $THIS/pkgs-graphics.txt
+            R_install $THIS/pkgs-lattice.txt
+        )
+    fi
+    (
+        set -x
+        # Simply load EQ/R:
+        swift-t ${FLAGS[@]} -E 'import EQR;'
+        swift-t ${FLAGS[@]} $THIS/test-eqr-1.swift
+        # Purrr:
+        swift-t ${FLAGS[@]} $THIS/test-apps-1.swift
+        # Farver:
+        swift-t ${FLAGS[@]} $THIS/test-apps-2.swift
+        # Lattice:
+        swift-t ${FLAGS[@]} $THIS/test-apps-3.swift
+    )
 )
 
-echo "..."
-echo "test-swift-t.sh: STOP: OK"
+if [[ $AUTO_TEST == "GitHub" ]]
+then
+    # For inspect-tests.sh
+    echo "TESTS SUCCESS." > test.log
+fi
+
+log "STOP: OK"
 
 # Local Variables:
 # sh-basic-offset: 4

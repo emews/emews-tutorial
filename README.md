@@ -17,13 +17,24 @@ and accessible via http://emews.org
 
 Must install asciidoctor as APT package, then asciidoctor-bibtex as Ruby Gem.
 
-Gem does not seem to work in Anaconda, Python 3.11, 2024-02-06 .
+Gem does not seem to work in:
 
-So do all these steps:
+* Anaconda, Python 3.11, 2024-02-06
+* Anaconda, Python 3.13, 2025-11-07
+
+This works in Anaconda for Python 3.13 as of 2026-01-09
+
+Or do all these steps:
 
 ```
 $ sudo apt install ruby-dev
 $ sudo apt install asciidoctor
 $ sudo gem install asciidoctor-bibtex
 $ sudo gem install pygments.rb
+```
+
+For Pygments, check your `gem` location, then do:
+
+```
+$ gem install pygments.rb
 ```
