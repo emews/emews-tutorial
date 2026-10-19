@@ -239,7 +239,7 @@ then
     CONDA_SH="$CONDA_HOME/etc/profile.d/conda.sh"
     if ! [[ -f $CONDA_SH ]]
     then
-        on_error "File not found: '$CONDA_SH'"
+        on_error "File not found:'$CONDA_BIN_DIR/activate' or '$CONDA_SH'"
     else
         source $CONDA_SH
         ACTIVATE="conda activate"
