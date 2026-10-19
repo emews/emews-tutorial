@@ -63,7 +63,7 @@ function on_error {
     exit 1
 }
 
-VALID_VERSIONS=("3.8" "3.9" "3.10" "3.11" "3.12")
+VALID_VERSIONS=("3.8" "3.9" "3.10" "3.11" "3.12" "3.13" "3.14")
 V_PREFIX=(${VALID_VERSIONS[@]::${#VALID_VERSIONS[@]}-1})
 V_SUFFIX="${VALID_VERSIONS[@]: -1}"
 printf -v joined '%s, ' "${V_PREFIX[@]}"
@@ -120,7 +120,7 @@ fi
 
 if [ ! $(command -v conda) ]; then
     echo "Error: conda executable not found. Conda must be activated."
-    echo "Try \"source ~/anaconda3/bin/activate\""
+    echo "Try \"source ~/miniforge3/bin/activate\" (substitute your conda install\nfor miniforge3 if not using miniforge3)."
     exit 1
 fi
 
@@ -128,6 +128,7 @@ CONDA_EXE=$(which conda)
 if [[ ${AUTO_TEST} != "GitHub" ]]
 then
     CONDA_BIN_DIR=$(dirname $CONDA_EXE)
+    CONDA_HOME=$(dirname $CONDA_BIN_DIR)
 else
     # The installation is a bit different on GitHub
     # conda    is in $CONDA_HOME/condabin
@@ -160,11 +161,21 @@ then
 fi
 
 start_step "$TEXT"
-if ! [[ -f $CONDA_BIN_DIR/activate ]]
+ACTIVATE=$CONDA_BIN_DIR/activate
+if ! [[ -f $ACTIVATE ]]
 then
-    on_error "File not found: '$CONDA_BIN_DIR/activate'"
+    # echo "File not found: '$CONDA_BIN_DIR/activate', trying 'conda.sh'"
+    CONDA_SH="$CONDA_HOME/etc/profile.d/conda.sh"
+    if ! [[ -f $CONDA_SH ]]
+    then
+        on_error "File not found: '$CONDA_SH'"
+    else
+        source $CONDA_SH
+        ACTIVATE="conda activate"
+    fi
 fi
-source $CONDA_BIN_DIR/activate $ENV_NAME || on_error "$TEXT"
+# source $CONDA_BIN_DIR/activate $ENV_NAME || on_error "$TEXT"
+$ACTIVATE $ENV_NAME || on_error "$TEXT"
 end_step "$TEXT"
 
 if (( ${#AUTO_TEST} ))
