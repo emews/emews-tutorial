@@ -232,21 +232,17 @@ then
     echo "activating: $CONDA_BIN_DIR/activate '$ENV_NAME'"
 fi
 start_step "$TEXT"
-ACTIVATE=$CONDA_BIN_DIR/activate
-if ! [[ -f $ACTIVATE ]]
+
+CONDA_SH="$CONDA_HOME/etc/profile.d/conda.sh"
+if ! [[ -f $CONDA_SH ]]
 then
-    # echo "File not found: '$CONDA_BIN_DIR/activate', trying 'conda.sh'"
-    CONDA_SH="$CONDA_HOME/etc/profile.d/conda.sh"
-    if ! [[ -f $CONDA_SH ]]
-    then
-        on_error "File not found:'$CONDA_BIN_DIR/activate' or '$CONDA_SH'"
-    else
-        source $CONDA_SH
-        ACTIVATE="conda activate"
-    fi
+    on_error "File not found:'$CONDA_BIN_DIR/activate' or '$CONDA_SH'"
+else
+    source $CONDA_SH
+    ACTIVATE="conda activate"
 fi
 # source $CONDA_BIN_DIR/activate $ENV_NAME || on_error "$TEXT"
-$ACTIVATE $ENV_NAME || on_error "$TEXT"
+conda activate $ENV_NAME || on_error "$TEXT"
 end_step "$TEXT"
 
 if (( ${#AUTO_TEST} ))
