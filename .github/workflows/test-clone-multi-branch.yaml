@@ -1,0 +1,72 @@
+name: Test from Clone (multi-branch)
+
+env:
+  # For Chicago time on log messages:
+  TZ: America/Chicago
+  # Setting to avoid MPID_Init() issues with MANA
+  #         on GitHub Azure system:
+  #         From Claude: 2026-10-04:
+  UCX_TLS: sm,self
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multi-branch
+
+jobs:
+  build:
+    name: OS=${{ matrix.os }} PY=${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-14  #  This is ARM64
+        # There is no free mac-14 for x86 on GitHub
+
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone info
+        run: >
+          git log -n 1
+          --date="format:%Y-%m-%d %H:%m"
+          --format=tformat:"%h %cd %an : %s"
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          # auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Check environment
+        run: |
+          echo "hostname:" $(hostname)
+          echo "whoami:  " $(whoami)
+          echo "date:    " $(date "+%Y-%m-%d %H:%M")
+          echo "pwd:     " $(pwd -P)
+          # Conda has not been activated-
+          #       this will change in install_emews.sh
+          echo "python:  " $(which python)
+      - name: Set up GitHub PAT
+        # Set up PAT for R install_github()
+        run: |
+          echo "GITHUB_PAT=${{ secrets.GH_PAT_WOZ }}" >> ~/.Renviron
+      - name: Install EMEWS
+        # Build with quiet, tests, and verbose
+        run: >
+          gh/check code/install/install_emews.sh
+          -q -t -v ${{ matrix.python-version }} $PWD/DB
+      - name: Inspect installation
+        run: |
+          gh/inspect-install.sh
+      - name: Test Swift/T and Apps
+        run: |
+          gh/check tests/test-swift-t.sh ${{ matrix.python-version }}
+      - name: Inspect tests
+        run: |
+          gh/inspect-tests.sh

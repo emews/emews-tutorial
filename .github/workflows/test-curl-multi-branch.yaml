@@ -1,0 +1,91 @@
+name: Test from Curl (multi-branch)
+
+env:
+  # For Chicago time on log messages:
+  TZ: America/Chicago
+  # Setting to avoid MPID_Init() issues with MANA
+  #         on GitHub Azure system:
+  #         From Claude: 2026-10-04:
+  UCX_TLS: sm,self
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - multi-branch
+
+jobs:
+  build:
+    name: OS=${{ matrix.os }} PY=${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-14  #  This is ARM64
+        # There is no free mac-14 for x86 on GitHub
+
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+
+    steps:
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          # auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Check environment
+        run: |
+          echo "hostname:" $(hostname)
+          echo "whoami:  " $(whoami)
+          echo "date:    " $(date "+%Y-%m-%d %H:%M")
+          echo "pwd:     " $(pwd -P)
+          # Conda has not been activated- this will change in install_emews.sh
+          echo "python:  " $(which python)
+          echo
+      - name: Download scripts
+        run: |
+          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/code/install/install_emews.sh
+          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/code/install/install_list.R
+          # -L : location redirect
+          # -O : remote-name
+          # -s : silent
+          # -S : show-error
+      - name: Set up GitHub PAT
+        # Set up PAT for R install_github()
+        run: |
+          echo "GITHUB_PAT=${{ secrets.GH_PAT_WOZ }}" >> ~/.Renviron
+      - name: Install EMEWS
+        run: |
+          bash install_emews.sh ${{ matrix.python-version }} $PWD/DB
+      - name: Show log
+        run: |
+          cat emews_install.log
+      - name: Inspect installation
+        run: |
+          # Look for SUCCESS in log:
+          grep "INSTALL SUCCESS." emews_install.log
+
+      # gh-run tests ...
+      # gh-run is created by install_emews.sh
+      - name: "Runtime test: gh-run sanity"
+        run: |
+          ./gh-run echo gh-run works
+      - name: "Runtime test: swift-t version info"
+        run: |
+          ./gh-run swift-t -v
+      - name: "Runtime test: swift-t sanity"
+        run: |
+          ./gh-run swift-t -E 'trace("SUCCESS SWIFT/T");'
+      - name: "Runtime test: swift-t include EQ/R"
+        run: |
+          ./gh-run swift-t -i EQR -E 'trace("SUCCESS EQ/R   ");'
+
+
+# TODO: Needs -I $CONDA_PREFIX/lib
+
+# We do not test everything here because we don't have a full clone.
+# See ./test-clone.yaml for the Swift/T tests.
