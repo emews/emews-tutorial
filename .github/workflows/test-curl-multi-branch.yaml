@@ -16,7 +16,10 @@ on:
 
 jobs:
   build:
-    name: OS=${{ matrix.os }} PY=${{ matrix.python-version }} MC=${{ matrix.miniconda-label }}
+    name: >-
+      OS=${{ contains(matrix.os, 'ubuntu') && 'Ubuntu' || 'Mac' }}
+      PY=${{ matrix.python-version }}
+      LBL=${{ matrix.miniconda-label }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
