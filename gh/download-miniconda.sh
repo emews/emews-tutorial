@@ -2,9 +2,11 @@
 set -eu
 
 # DOWNLOAD MINICONDA
-# Install the newest Miniconda whose Python matches PYTHON_VERSION.
-# Usage: download-miniconda.sh PYTHON_VERSION INSTALL_DIR
-#   e.g. download-miniconda.sh 3.11 $HOME/miniconda
+# Install a Miniconda whose Python matches PYTHON_VERSION.
+# Usage: download-miniconda.sh PYTHON_VERSION INSTALL_DIR [LABEL]
+#   LABEL is OLD, MID, or NEW (default NEW), picking the oldest,
+#   middle, or newest installer in the table above.
+#   e.g. download-miniconda.sh 3.11 $HOME/miniconda MID
 # On GitHub Actions, INSTALL_DIR/bin is added to PATH for later steps.
 #
 # Sample Linux x86_64 installers from repo.anaconda.com/miniconda,
@@ -19,12 +21,14 @@ set -eu
 #   3.13    25.3.1-1  26.1.1-1  26.9.4-0
 #   3.14    26.5.3-1  26.7.1-0  26.9.4-0
 
-if (( ${#*} != 2 )) {
-  print "download-miniconda.sh: Provide PYTHON_VERSION and INSTALL_DIR!"
+if (( ${#*} < 2 || ${#*} > 3 )) {
+  print "download-miniconda.sh: Provide PYTHON_VERSION INSTALL_DIR" \
+        "[LABEL]!"
   exit 1
 }
 PY_VERSION=$1
 INSTALL_DIR=$2
+LABEL=${3:-NEW}
 
 BASE_URL=https://repo.anaconda.com/miniconda
 PY_TAG=py${PY_VERSION//./}
@@ -38,14 +42,25 @@ ARCH=$( uname -m )
 
 PATTERN="Miniconda3-${PY_TAG}_[^\"<]*-${OS}-${ARCH}.sh"
 
-INSTALLER=$( curl -LsS $BASE_URL/ | \
-             grep -o $PATTERN     | \
-             sort -uV | tail -1   )
-if [[ $INSTALLER == "" ]] {
+INSTALLERS=( ${(f)"$( curl -LsS $BASE_URL/ | \
+                      grep -o $PATTERN     | \
+                      sort -uV )"} )
+N=${#INSTALLERS}
+if (( N == 0 )) {
   print "download-miniconda.sh:" \
         "No installer for ${PY_TAG} ${OS} ${ARCH}"
   exit 1
 }
+case $LABEL {
+  OLD) I=1 ;;
+  MID) I=$(( (N + 1) / 2 )) ;;
+  NEW) I=$N ;;
+  *)
+    print "download-miniconda.sh: Unknown LABEL: $LABEL"
+    exit 1
+    ;;
+}
+INSTALLER=${INSTALLERS[I]}
 
 print "download-miniconda.sh: $INSTALLER"
 curl -LsSo installer.sh $BASE_URL/$INSTALLER

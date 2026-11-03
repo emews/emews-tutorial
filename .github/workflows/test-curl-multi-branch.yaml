@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    name: OS=${{ matrix.os }} PY=${{ matrix.python-version }}
+    name: OS=${{ matrix.os }} PY=${{ matrix.python-version }} MC=${{ matrix.miniconda-label }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -32,6 +32,11 @@ jobs:
           - "3.13"
           - "3.14"
 
+        miniconda-label:
+          - OLD
+          - MID
+          - NEW
+
     steps:
       - name: Install zsh
         if: runner.os == 'Linux'
@@ -41,7 +46,8 @@ jobs:
           curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/gh/download-miniconda.sh
       - name: Install Miniconda
         run: |
-          zsh download-miniconda.sh ${{ matrix.python-version }} $HOME/miniconda
+          zsh download-miniconda.sh ${{ matrix.python-version }} \
+            $HOME/miniconda ${{ matrix.miniconda-label }}
       - name: Check environment
         run: |
           echo "hostname:" $(hostname)
