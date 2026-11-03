@@ -39,6 +39,7 @@ jobs:
           - OLD
           - MID
           - NEW
+          - NOW
 
     steps:
       - name: Install zsh
@@ -47,11 +48,17 @@ jobs:
       - name: Download Miniconda script
         run: |
           curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/gh/download-miniconda.sh
+      # The script always writes proceed=true or proceed=false.
+      # NOW writes proceed=false when the latest Miniconda's Python is
+      # not this job's Python: later steps are skipped, and the job
+      # passes.  Otherwise it writes proceed=true and the steps run.
       - name: Install Miniconda
+        id: miniconda
         run: |
           zsh download-miniconda.sh ${{ matrix.python-version }} \
             $HOME/miniconda ${{ matrix.miniconda-label }}
       - name: Check environment
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           echo "hostname:" $(hostname)
           echo "whoami:  " $(whoami)
@@ -62,6 +69,7 @@ jobs:
           echo "python:  " $(which python)
           echo
       - name: Download scripts
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/code/install/install_emews.sh
           curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/code/install/install_list.R
@@ -70,16 +78,20 @@ jobs:
           # -s : silent
           # -S : show-error
       - name: Set up GitHub PAT
+        if: steps.miniconda.outputs.proceed == 'true'
         # Set up PAT for R install_github()
         run: |
           echo "GITHUB_PAT=${{ secrets.GH_PAT_WOZ }}" >> ~/.Renviron
       - name: Install EMEWS
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           bash install_emews.sh ${{ matrix.python-version }} $PWD/DB
       - name: Show log
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           cat emews_install.log
       - name: Inspect installation
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           # Look for SUCCESS in log:
           grep "INSTALL SUCCESS." emews_install.log
@@ -87,15 +99,19 @@ jobs:
       # gh-run tests ...
       # gh-run is created by install_emews.sh
       - name: "Runtime test: gh-run sanity"
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           ./gh-run echo gh-run works
       - name: "Runtime test: swift-t version info"
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           ./gh-run swift-t -v
       - name: "Runtime test: swift-t sanity"
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           ./gh-run swift-t -E 'trace("SUCCESS SWIFT/T");'
       - name: "Runtime test: swift-t include EQ/R"
+        if: steps.miniconda.outputs.proceed == 'true'
         run: |
           ./gh-run swift-t -i EQR -E 'trace("SUCCESS EQ/R   ");'
 

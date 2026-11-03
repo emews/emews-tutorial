@@ -6,6 +6,9 @@ set -eu
 # Usage: download-miniconda.sh PYTHON_VERSION INSTALL_DIR [LABEL]
 #   LABEL is OLD, MID, or NEW (default NEW), picking the oldest,
 #   middle, or newest installer in the table above.
+#   LABEL NOW installs Miniconda3-latest.  If its Python is not
+#   PYTHON_VERSION, print a message, set proceed=false in
+#   GITHUB_OUTPUT, and exit 0.
 #   e.g. download-miniconda.sh 3.11 $HOME/miniconda MID
 # On GitHub Actions, INSTALL_DIR/bin is added to PATH for later steps.
 #
@@ -40,28 +43,52 @@ if [[ $( uname -s ) == Darwin ]] {
 }
 ARCH=$( uname -m )
 
-PATTERN="Miniconda3-${PY_TAG}_[^\"<]*-${OS}-${ARCH}.sh"
-
-INSTALLERS=( ${(f)"$( curl -LsS $BASE_URL/ | \
-                      grep -o $PATTERN     | \
-                      sort -uV )"} )
-N=${#INSTALLERS}
-if (( N == 0 )) {
-  print "download-miniconda.sh:" \
-        "No installer for ${PY_TAG} ${OS} ${ARCH}"
-  exit 1
-}
-case $LABEL {
-  OLD) I=1 ;;
-  MID) I=$(( (N + 1) / 2 )) ;;
-  NEW) I=$N ;;
-  *)
-    print "download-miniconda.sh: Unknown LABEL: $LABEL"
+if [[ $LABEL == NOW ]] {
+  INSTALLER=Miniconda3-latest-${OS}-${ARCH}.sh
+  # The installer header names its Python, e.g. "# VER: py314_...".
+  HEAD_BYTES=$( curl -LsS -r 0-200000 $BASE_URL/$INSTALLER )
+  VER_LINE=$( grep -a -m1 '^# VER:' <<< "$HEAD_BYTES" )
+  if [[ -z $VER_LINE ]] {
+    print "download-miniconda.sh: No VER line in $INSTALLER"
     exit 1
-    ;;
-}
-INSTALLER=${INSTALLERS[I]}
+  }
+  LATEST_TAG=${VER_LINE##*VER:}
+  LATEST_TAG=${LATEST_TAG// /}
+  LATEST_TAG=${LATEST_TAG%%_*}
+  if [[ $LATEST_TAG != $PY_TAG ]] {
+    print "NOW is not ${PY_VERSION} - exiting with success."
+    if [[ -n ${GITHUB_OUTPUT:-} ]] {
+      print "proceed=false" >> $GITHUB_OUTPUT
+    }
+    exit 0
+  }
+} else {
+  PATTERN="Miniconda3-${PY_TAG}_[^\"<]*-${OS}-${ARCH}.sh"
 
+  INSTALLERS=( ${(f)"$( curl -LsS $BASE_URL/ | \
+                        grep -o $PATTERN     | \
+                        sort -uV )"} )
+  N=${#INSTALLERS}
+  if (( N == 0 )) {
+    print "download-miniconda.sh:" \
+          "No installer for ${PY_TAG} ${OS} ${ARCH}"
+    exit 1
+  }
+  case $LABEL {
+    OLD) I=1 ;;
+    MID) I=$(( (N + 1) / 2 )) ;;
+    NEW) I=$N ;;
+    *)
+      print "download-miniconda.sh: Unknown LABEL: $LABEL"
+      exit 1
+      ;;
+  }
+  INSTALLER=${INSTALLERS[I]}
+}
+
+if [[ -n ${GITHUB_OUTPUT:-} ]] {
+  print "proceed=true" >> $GITHUB_OUTPUT
+}
 print "download-miniconda.sh: $INSTALLER"
 curl -LsSo installer.sh $BASE_URL/$INSTALLER
 bash installer.sh -b -p $INSTALL_DIR
