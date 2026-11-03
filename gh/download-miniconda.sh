@@ -2,10 +2,22 @@
 set -eu
 
 # DOWNLOAD MINICONDA
-# Install the newest Miniconda whose base Python matches PYTHON_VERSION.
+# Install the newest Miniconda whose Python matches PYTHON_VERSION.
 # Usage: download-miniconda.sh PYTHON_VERSION INSTALL_DIR
 #   e.g. download-miniconda.sh 3.11 $HOME/miniconda
 # On GitHub Actions, INSTALL_DIR/bin is added to PATH for later steps.
+#
+# Sample Linux x86_64 installers from repo.anaconda.com/miniconda,
+# as of 2026-10-27.  Files are Miniconda3-pyXXX_VERSION-Linux-x86_64.sh.
+#
+# Use ./python-table.sh to refresh this table
+#
+#   Python  Oldest    Middle    Newest
+#   ------  --------  --------  --------
+#   3.11    23.5.0-3  25.1.1-1  26.9.4-0
+#   3.12    24.1.2-0  25.5.1-1  26.9.4-0
+#   3.13    25.3.1-1  26.1.1-1  26.9.4-0
+#   3.14    26.5.3-1  26.7.1-0  26.9.4-0
 
 if (( ${#*} != 2 )) {
   print "download-miniconda.sh: Provide PYTHON_VERSION and INSTALL_DIR!"
