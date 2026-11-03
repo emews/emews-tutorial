@@ -25,13 +25,16 @@ set -eu
 #   3.14    26.5.3-1  26.7.1-0  26.9.4-0
 
 if (( ${#*} < 2 || ${#*} > 3 )) {
-  print "download-miniconda.sh: Provide PYTHON_VERSION INSTALL_DIR" \
-        "[LABEL]!"
+  print "download-miniconda.sh:" \
+        "Provide PYTHON_VERSION INSTALL_DIR [LABEL]"
   exit 1
 }
 PY_VERSION=$1
 INSTALL_DIR=$2
 LABEL=${3:-NEW}
+
+print "download-miniconda.sh:" \
+      "START $PYTHON_VERSION $INSTALL_DIR $LABEL"
 
 BASE_URL=https://repo.anaconda.com/miniconda
 PY_TAG=py${PY_VERSION//./}
@@ -43,7 +46,7 @@ if [[ $( uname -s ) == Darwin ]] {
 }
 ARCH=$( uname -m )
 
-if [[ $LABEL == NOW ]] {
+if [[ $LABEL == "NOW" ]] {
   INSTALLER=Miniconda3-latest-${OS}-${ARCH}.sh
   # The installer header names its Python, e.g. "# VER: py314_...".
   HEAD_BYTES=$( curl -LsS -r 0-200000 $BASE_URL/$INSTALLER )
@@ -79,7 +82,7 @@ if [[ $LABEL == NOW ]] {
     MID) I=$(( (N + 1) / 2 )) ;;
     NEW) I=$N ;;
     *)
-      print "download-miniconda.sh: Unknown LABEL: $LABEL"
+      print "download-miniconda.sh: Unknown LABEL: '$LABEL'"
       exit 1
       ;;
   }
