@@ -34,7 +34,7 @@ INSTALL_DIR=$2
 LABEL=${3:-NEW}
 
 print "download-miniconda.sh:" \
-      "START $PYTHON_VERSION $INSTALL_DIR $LABEL"
+      "START $PY_VERSION $INSTALL_DIR $LABEL"
 
 BASE_URL=https://repo.anaconda.com/miniconda
 PY_TAG=py${PY_VERSION//./}
