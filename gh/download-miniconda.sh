@@ -3,7 +3,10 @@ set -eu
 
 # DOWNLOAD MINICONDA
 # Install a Miniconda whose Python matches PYTHON_VERSION.
-# Usage: download-miniconda.sh PYTHON_VERSION INSTALL_DIR [LABEL]
+# Usage: download-miniconda.sh [-i] PYTHON_VERSION INSTALL_DIR [LABEL]
+#   Without -i, save the installer as INSTALL_DIR/<original name>.
+#   With -i, install Miniconda into INSTALL_DIR and add its bin to
+#   GITHUB_PATH.
 #   LABEL is OLD, MID, or NEW (default NEW), picking the oldest,
 #   middle, or newest installer in the table above.
 #   LABEL NOW installs Miniconda3-latest.  If its Python is not
@@ -24,9 +27,12 @@ set -eu
 #   3.13    25.3.1-1  26.1.1-1  26.9.4-0
 #   3.14    26.5.3-1  26.7.1-0  26.9.4-0
 
+INSTALL=()
+zparseopts -D -E i=INSTALL
+
 if (( ${#*} < 2 || ${#*} > 3 )) {
   print "download-miniconda.sh:" \
-        "Provide PYTHON_VERSION INSTALL_DIR [LABEL]"
+        "Provide [-i] PYTHON_VERSION INSTALL_DIR [LABEL]"
   exit 1
 }
 PY_VERSION=$1
@@ -93,8 +99,12 @@ if [[ -n ${GITHUB_OUTPUT:-} ]] {
   print "proceed=true" >> $GITHUB_OUTPUT
 }
 print "download-miniconda.sh: $INSTALLER"
-curl -LsSo installer.sh $BASE_URL/$INSTALLER
-bash installer.sh -b -p $INSTALL_DIR
-rm installer.sh
-
-print $INSTALL_DIR/bin >> $GITHUB_PATH
+if (( ${#INSTALL} )) {
+  curl -LsSo installer.sh $BASE_URL/$INSTALLER
+  bash installer.sh -b -p $INSTALL_DIR
+  rm installer.sh
+  print $INSTALL_DIR/bin >> $GITHUB_PATH
+} else {
+  mkdir -p $INSTALL_DIR
+  curl -LsSo $INSTALL_DIR/$INSTALLER $BASE_URL/$INSTALLER
+}

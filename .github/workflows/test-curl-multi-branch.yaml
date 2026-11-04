@@ -55,7 +55,7 @@ jobs:
       - name: Install Miniconda
         id: miniconda
         run: |
-          zsh download-miniconda.sh ${{ matrix.python-version }} \
+          zsh download-miniconda.sh -i ${{ matrix.python-version }} \
             $HOME/miniconda ${{ matrix.miniconda-label }}
       - name: Check environment
         if: steps.miniconda.outputs.proceed == 'true'
