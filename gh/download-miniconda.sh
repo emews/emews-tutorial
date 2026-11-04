@@ -84,7 +84,12 @@ if [[ $LABEL == "NOW" ]] {
     exit 1
   }
   case $LABEL {
-    OLD) I=1 ;;
+    OLD)
+      I=1
+      # The oldest 3.11 installer hangs in Install EMEWS
+      # for both Ubuntu and Mac: use the next one.
+      if [[ $PY_TAG == "py311" ]] I=2
+      ;;
     MID) I=$(( (N + 1) / 2 )) ;;
     NEW) I=$N ;;
     *)
