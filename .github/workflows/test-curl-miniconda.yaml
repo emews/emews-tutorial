@@ -1,4 +1,4 @@
-name: Test from Curl (multi-branch)
+name: Test Curl Miniconda
 
 env:
   # For Chicago time on log messages:

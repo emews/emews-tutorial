@@ -1,4 +1,4 @@
-name: Test from Clone (multi-branch)
+name: Test Clone Miniconda
 
 env:
   # For Chicago time on log messages:

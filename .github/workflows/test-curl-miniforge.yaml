@@ -1,4 +1,4 @@
-name: Test from Curl (multi-branch, miniforge)
+name: Test Curl Miniforge
 
 env:
   # For Chicago time on log messages:
