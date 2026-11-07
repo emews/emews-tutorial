@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - multi-branch
+      - main
 
 jobs:
   build:
@@ -47,7 +47,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y zsh
       - name: Download Miniconda script
         run: |
-          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/gh/download-miniconda.sh
+          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/main/gh/download-miniconda.sh
       # The script always writes proceed=true or proceed=false.
       # NOW writes proceed=false when the latest Miniconda's Python is
       # not this job's Python: later steps are skipped, and the job
@@ -71,8 +71,8 @@ jobs:
       - name: Download scripts
         if: steps.miniconda.outputs.proceed == 'true'
         run: |
-          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/code/install/install_emews.sh
-          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/multi-branch/code/install/install_list.R
+          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_emews.sh
+          curl -LOsS https://raw.githubusercontent.com/emews/emews-tutorial/main/code/install/install_list.R
           # -L : location redirect
           # -O : remote-name
           # -s : silent

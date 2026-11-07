@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - multi-branch
+      - main
 
 jobs:
   build:
