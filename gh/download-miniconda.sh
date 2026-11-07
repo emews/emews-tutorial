@@ -3,10 +3,15 @@ set -eu
 
 # DOWNLOAD MINICONDA
 # Install a Miniconda whose Python matches PYTHON_VERSION.
-# Usage: download-miniconda.sh [-i] PYTHON_VERSION INSTALL_DIR [LABEL]
+# Usage: download-miniconda.sh [-i] [-f] PYTHON_VERSION INSTALL_DIR
+#                                [LABEL]
 #   Without -i, save the installer as INSTALL_DIR/<original name>.
-#   With -i, install Miniconda into INSTALL_DIR and add its bin to
-#   GITHUB_PATH.
+#   With -i, install into INSTALL_DIR and add its bin to GITHUB_PATH.
+#   Without -f, use Miniconda from repo.anaconda.com.
+#   With -f, use the latest Miniforge from conda-forge/miniforge.
+#   Miniforge has no per-Python installers, so with -f the LABEL is
+#   ignored and PYTHON_VERSION is not checked.  The env that
+#   install_emews.sh creates still uses the matrix Python.
 #   LABEL is OLD, MID, or NEW (default NEW), picking the oldest,
 #   middle, or newest installer in the table above.
 #   LABEL NOW installs Miniconda3-latest.  If its Python is not
@@ -28,11 +33,12 @@ set -eu
 #   3.14    26.5.3-1  26.7.1-0  26.9.4-0
 
 INSTALL=()
-zparseopts -D -E i=INSTALL
+FORGE=()
+zparseopts -D -E i=INSTALL f=FORGE
 
 if (( ${#*} < 2 || ${#*} > 3 )) {
   print "download-miniconda.sh:" \
-        "Provide [-i] PYTHON_VERSION INSTALL_DIR [LABEL]"
+        "Provide [-i] [-f] PYTHON_VERSION INSTALL_DIR [LABEL]"
   exit 1
 }
 PY_VERSION=$1
@@ -43,6 +49,7 @@ print "download-miniconda.sh:" \
       "START $PY_VERSION $INSTALL_DIR $LABEL"
 
 BASE_URL=https://repo.anaconda.com/miniconda
+FORGE_URL=https://github.com/conda-forge/miniforge/releases/latest/download
 PY_TAG=py${PY_VERSION//./}
 
 if [[ $( uname -s ) == Darwin ]] {
@@ -52,7 +59,13 @@ if [[ $( uname -s ) == Darwin ]] {
 }
 ARCH=$( uname -m )
 
-if [[ $LABEL == "NOW" ]] {
+if (( ${#FORGE} )) {
+  if [[ $LABEL != "NEW" ]] {
+    print "download-miniconda.sh: -f ignores LABEL $LABEL"
+  }
+  BASE_URL=$FORGE_URL
+  INSTALLER=Miniforge3-${OS}-${ARCH}.sh
+} elif [[ $LABEL == "NOW" ]] {
   INSTALLER=Miniconda3-latest-${OS}-${ARCH}.sh
   # The installer header names its Python, e.g. "# VER: py314_...".
   HEAD_BYTES=$( curl -LsS -r 0-200000 $BASE_URL/$INSTALLER )
