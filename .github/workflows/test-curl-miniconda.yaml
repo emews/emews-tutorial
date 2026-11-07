@@ -26,7 +26,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-14  #  This is ARM64
+          - macOS-15  #  This is ARM64
         # There is no free mac-14 for x86 on GitHub
 
         python-version:
