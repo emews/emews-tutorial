@@ -1,6 +1,6 @@
 = Swift/T CI and Packaging: Saved State
 
-Saved: 2026-11-07
+Saved: 2026-11-07 19:38:47
 
 == Summary
 
@@ -15,6 +15,38 @@ Saved: 2026-11-07
 * Next step for a Mac: rebuild the osx-arm64 `swift-t-r` package and test
   it (see "Mac rebuild" below). Do not rebuild against tk 8.6.13 (see
   "Tcl/Tk").
+
+== Timeline
+
+Times are America/Chicago. Approximate entries are marked "~".
+
+* 2026-10-22 ~07:40:46: scheduled Test from Clone starts failing on
+  Ubuntu 3.13/3.14 (`openjdk` glob).
+* 2026-10-24 09:40:12: push to `multi-branch` starts its test runs.
+* 2026-10-24 09:41:13: `main` runs dispatched manually.
+* 2026-10-27 11:25:19: `multi-branch` runs `40540…` (macOS first
+  cancelled, then passed on rerun).
+* 2026-11-02 20:44:02: `e3b7324` Ubuntu 3.11 job starts; passes at
+  2026-11-02 20:49:22.
+* 2026-11-02 20:57:59: GitHub API rate limit (HTTP 403).
+* 2026-11-03 20:11:59: `d0716d8` Curl Ubuntu 3.11 OLD job starts;
+  stuck in `Install EMEWS`.
+* 2026-11-03 20:44:00: that Curl run cancelled (after the Mac 3.11
+  OLD job completed).
+* 2026-11-03 ~21:18:00: `0def678` Test from Clone passes (monitor log).
+* 2026-11-07 14:50:12: push `c6335f7` ("Add miniforge case").
+  macOS jobs cancelled at 14:50:13–14, no runner assigned.
+* 2026-11-07 14:53:26: push `f4966f6` to `main` (merge, "Renames").
+* 2026-11-07 14:57:00: manual `main` run 42413481980 created; macOS
+  jobs rejected ("configuration 'macos-14-arm64-us-default' is not
+  supported").
+* 2026-11-07 15:16:40: push `6aa04cf` to `main` (macOS-15 change).
+* 2026-11-07 15:32:33–15:34:23: `c6c323b` macOS-15 jobs start; Mac
+  Miniforge `Install EMEWS` and `Inspect installation` fail.
+* 2026-11-07 15:39:32: monitor started for `c6c323b`.
+* 2026-11-07 19:10:27: monitor detects Clone Miniconda success;
+  Clone Miniforge and Curl Miniforge failures.
+* 2026-11-07 19:38:47: transcript saved.
 
 == Repository state
 
