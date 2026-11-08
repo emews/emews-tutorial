@@ -1,0 +1,182 @@
+= Swift/T CI and Packaging: Saved State
+
+Saved: 2026-11-07
+
+== Summary
+
+* Linux: the openjdk glob failure is fixed in the published
+  `swift-t-r` 1.6.9 build 6 (py311–py314, linux-64). Linux tests pass.
+* macOS: the osx-arm64 `swift-t-r` 1.6.9 builds on anaconda.org are old,
+  and Miniforge cannot solve them. Miniconda (which includes `defaults`)
+  passes on macOS-15 in CI.
+* The GitHub macOS-14 runner was rejected ("The configuration
+  'macos-14-arm64-us-default' is not supported"), so the workflows now
+  use `macOS-15`.
+* Next step for a Mac: rebuild the osx-arm64 `swift-t-r` package and test
+  it (see "Mac rebuild" below). Do not rebuild against tk 8.6.13 (see
+  "Tcl/Tk").
+
+== Repository state
+
+* `main` is at `c6c323b` ("Update to macos-15"). `multi-branch` was merged
+  into `main`.
+* `swift-t/` is at `4b3882df1` ("New java search structure"), which
+  contains the run-time Java lookup fix in `stc/code/etc/stc-config.sh`.
+* Active workflows (in `.github/workflows/`), all triggered on push to
+  `main` plus manual dispatch:
+  - `test-clone-miniconda.yaml`: `setup-miniconda` (Miniconda), macOS-15.
+  - `test-curl-miniconda.yaml`: `download-miniconda.sh -i <py> $HOME/miniconda <LABEL>`,
+    labels OLD, MID, NEW, NOW. Downloads scripts from `main`. macOS-15.
+  - `test-clone-miniforge.yaml`: `setup-miniconda` with
+    `miniforge-variant: Miniforge3`. macOS-15. FAILS on macOS (see below).
+  - `test-curl-miniforge.yaml`: `download-miniconda.sh -i -f <py> $HOME/miniconda`
+    (no labels). Downloads scripts from `main`. macOS-15. FAILS on macOS
+    and Linux (not yet diagnosed on Linux).
+  - `quartz.yaml`: not discussed here.
+* `test-clone.yaml.bak` and `test-curl.yaml.bak`: the original main
+  workflows, renamed on purpose. They do not run.
+* `gh/download-miniconda.sh`:
+  - `[-i]` installs; without it, the installer is saved in INSTALL_DIR.
+  - `[-f]` uses the latest Miniforge (conda-forge/miniforge), ignores
+    LABEL, and always writes `proceed=true`.
+  - Without `-f`: Miniconda. Labels OLD, MID, NEW pick oldest, middle,
+    newest installer. For 3.11 OLD the index is 2 (see "Open items").
+  - NOW reads the `# VER:` line of `Miniconda3-latest` and writes
+    `proceed=false` if the Python does not match.
+* `gh/monitor-runs.sh` (new, uncommitted): polls one commit's Test runs
+  every N seconds with one `gh run list` call per poll. Output goes to
+  `tmp-monitor.log` (append) and `tmp-monitor.fifo`. Usage:
+  `zsh gh/monitor-runs.sh -s <sha> -i 180`, `-1` for one poll. Read with
+  `tail -f tmp-monitor.log`.
+
+== CI results on `c6c323b` (main)
+
+* Test Clone Miniconda: SUCCESS, including macOS-15 3.11–3.14.
+* Test Clone Miniforge: FAILED. macOS-15 3.11–3.14 fail at
+  `Inspect installation` (solver cannot satisfy python 3.12 with
+  osx-arm64 `eq-r`/`swift-t-r`; conflicts on `tk` and `libffi`).
+* Test Curl Miniforge: FAILED. Mac 3.11–3.14 fail at `Install EMEWS`
+  (`eq-r =1.3` needs `tk >=8.6.15,<9.0a0`, "does not exist"). Linux also
+  failed; logs not yet read.
+* Test Curl Miniconda: was still running at last check.
+* Earlier macOS-14 runs were rejected by GitHub before a runner was
+  assigned (1 second, no runner). Switched to macOS-15.
+
+== Tcl/Tk (the macOS blocker)
+
+* The osx-arm64 `swift-t-r` 1.6.9 package needs `tk>=8.6.15,<9.0a0`.
+  The pin is in `swift-t/dev/conda/osx-arm64/deps.sh` (line 27,
+  `SPEC_TK`).
+* The pin exists because tk 8.6.13 builds `-h892fb3f_3`, `-hd3d0363_3`,
+  and `-h010d191_3` export `strstr`. On macOS, that makes Turbine's
+  `libtclturbine` bind `_strstr` to Tcl instead of libc, and it fails at
+  runtime with "Symbol not found: _strstr". `tk-8.6.13-hbeba79b_4` and
+  `tk-8.6.15-*` are fine. The comment in `deps.sh` (around lines 28–60)
+  explains this.
+* Channels for osx-arm64 `tk`:
+  - conda-forge: 8.6.10, 8.6.11, 8.6.12, 8.6.13, 9.0.4. No 8.6.15.
+  - defaults (anaconda.org): 8.6.10, 8.6.11, 8.6.12, 8.6.14, 8.6.15, 9.0.4.
+  - swift-t channel: no `tk` packages.
+* So `tk>=8.6.15` exists only in `defaults`. Miniforge (conda-forge only)
+  cannot solve it. Miniconda includes `defaults`, so it can.
+* Do NOT just pin `tk==8.6.13` to get the solve working. That can select
+  the `_3` builds that break `strstr`.
+* Safe builds (per the `deps.sh` comment; `strstr` export not verified
+  by `nm`):
+  - conda-forge `tk 8.6.13 hbeba79b_4`. Pin with
+    `SPEC_TK='tk==8.6.13=hbeba79b_4'`. This is the build the local
+    Linux-built and tested osx package resolved to. It is on conda-forge,
+    so Miniforge can use it. It does NOT meet the current `>=8.6.15`
+    floor in `deps.sh`, so that floor must change.
+  - defaults `tk 8.6.15 hcd8a7d5_0`. Meets the current floor. Only on
+    `defaults`, so it needs `-c defaults` (Miniforge cannot use it).
+    Build string not individually confirmed against the comment table.
+* Bad builds to exclude (export `strstr`): `tk 8.6.13` with `h892fb3f_2`,
+  `h892fb3f_3`, `hd3d0363_3`, `h010d191_3`. Do not use unpinned `tk`
+  in the recipe; the solver may choose a bad `_3` build.
+* Other available builds, not yet assessed: defaults `8.6.14`
+  (`h6ba3021_0`, `h6ba3021_1`); conda-forge `8.6.13 hb31c410_0`,
+  `h5083fa2_1`. tk 9.0.4 is excluded by the `<9.0a0` upper bound.
+* Before changing the recipe, check the chosen package with `nm` for
+  `strstr`. That needs a download (not an install); not yet done.
+* Options: (a) add `defaults` to the Miniforge install, so the solve can
+  reach `tk` 8.6.15; (b) rebuild the osx-arm64 package with a `tk` that
+  conda-forge has and that is not the broken `_3`/_4 pattern; (c) fix the
+  two-level namespace issue at the source (`turbine/code/Makefile.in`,
+  `MAC_FLAT`, and the `-ltcl8.6` link order), as the deps.sh comment
+  describes.
+
+== Mac rebuild (what to do on a Mac)
+
+1. Clone the tutorial repo and check out `swift-t` at `4b3882df1` or later.
+2. Make the release tarball in Mac mode:
+   `cd swift-t && dev/release/make-release-pkg.zsh -m`
+   (writes `$TMP/distro`, default `/tmp/distro`, using `TMP` if set).
+3. Build the osx-arm64 package from `swift-t`, with a conda that has
+   `conda-build`:
+   `dev/conda/conda-build.sh -r 4.4 osx-arm64 <BUILD_NUMBER>`
+   Use a build number above any existing osx-arm64 build
+   (the channel has 311_3..5, 312_3..5, 313_4..7, 314_2..4).
+   The recipe needs `tk>=8.6.15`, which may require `defaults` in the
+   build channels (not checked).
+4. Test the package in a fresh env:
+   `dev/conda/conda-install.sh -r <PKG>`, then
+   `tests/test-swift-t.sh -E 3.13` (or other versions).
+   Check `strstr`: `swift-t -v` and a trace must run without
+   "Symbol not found".
+5. Upload (only after tests pass, needs `anaconda login` as `swift-t`):
+   `dev/conda/upload.sh <PKG>`.
+   Upload is a shared-channel change: ask first.
+
+== Workflows: what to watch
+
+* `gh run list --branch main` shows Test runs; `gh/monitor-runs.sh`
+  polls one commit at 3-minute intervals.
+* GitHub API rate limit (HTTP 403) was hit earlier. One `gh run list`
+  per poll, and job logs only after a run finishes (in-progress runs
+  return "logs will be available when it is complete").
+* macOS jobs cancelled after about one second, with no runner assigned,
+  appeared earlier. Check the run page annotations first.
+
+== Open items
+
+* Decide how to fix macOS (options above). Nothing on the channel has
+  been changed.
+* Read the Linux `Test Curl Miniforge` failure once the run is complete.
+* Check `Test Curl Miniconda` on `c6c323b` (last check: in progress).
+* The Ubuntu 3.11 OLD hang (Curl Miniconda): the 3.11 OLD index is 2.
+  Planned change: index 3, not yet made. Hang was on index 1 and on
+  index 2 in earlier runs.
+* `swift-t/dev/conda/osx-arm64/deps.sh` has contradictory comments:
+  line 27 pins `tk>=8.6.15`, and a later comment says `SPEC_TK='tk==8.6.13'`
+  (historical). Check before changing.
+* Uncommitted or untracked in the tutorial repo: `code/install/install_pkgs.R`
+  (modified), `gh/monitor-runs.sh`, `Transcript.adoc`, `DB/`, `gh-run`,
+  `Rplots.pdf`, `install_list.R`, `installer.sh`, `miniconda-list.txt`,
+  `job-log.txt`, `tests/README.adoc`, `tmp-*` files, `swift-t/`, and
+  `workflow-matrix-attempt.patch` (abandoned). Check each before deleting.
+* `~/.condarc` was not modified by the aborted install test. `~/.conda`
+  was not checked.
+* The Miniconda 313-B env's `bin/conda` is missing, so I used
+  `/home/woz/Public/sfw/Miniconda/312-Main` for searches.
+* Anaconda token was reported to expire 2026-10-26. Check `anaconda whoami`
+  before any upload.
+* Old Miniforge test prefix (`tmp-mf-prefix`) was removed. The installer
+  for 26.9.4-2 was removed. Miniforge 26.9.4-2's base Python is 3.14.10.
+
+== Miniforge base Python
+
+* Miniforge 26.9.4-2 (`Miniforge3-26.9.4-2-Linux-x86_64.sh`): installed
+  into a throwaway prefix. Base Python 3.14.10, conda 26.9.4. Only one
+  release checked.
+
+== notes.txt rules to follow
+
+1. Temp files go in PWD.
+2. Never install software; ask first.
+3. Break multi-line shell commands across lines.
+4. Never run `import`.
+5-7. Suggest doc, cosmetic, and self-documenting comment improvements.
+8. Date notes as `YYYY-MM-DD HH:MM:SS`.
+9. Code line length 70.
+10. Never run `git add` or `git commit`; suggest them instead.
