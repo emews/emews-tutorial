@@ -99,9 +99,9 @@ if (( ${#FORGE} )) {
   case $LABEL {
     OLD)
       I=1
-      # The oldest 3.11 installer hangs in Install EMEWS
-      # for both Ubuntu and Mac: use the next one.
-      if [[ $PY_TAG == "py311" ]] I=2
+      # The 1st to 4th oldest 3.11 installers hang in Install EMEWS
+      # (EQ/R step): use the 5th oldest, 23.10.0-1.
+      if [[ $PY_TAG == "py311" ]] I=5
       ;;
     MID) I=$(( (N + 1) / 2 )) ;;
     NEW) I=$N ;;
