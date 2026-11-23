@@ -84,7 +84,7 @@ if [[ $AUTO_TEST == "Jenkins" ]]
 then
     # CELS Jenkins environment
     CONDA_BIN_DIR=$WORKSPACE/../EMEWS-Conda/sfw/Miniconda-311_${CONDA_LABEL}/bin
-    CONDA_BIN_DIR=$( realpath --canonicalize $CONDA_BIN_DIR )
+    CONDA_BIN_DIR=$( realpath --canonicalize-existing $CONDA_BIN_DIR )
     PATH=$CONDA_BIN_DIR:$PATH
 elif [[ $AUTO_TEST == "GitHub" ]]
 then
