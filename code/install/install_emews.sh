@@ -308,15 +308,16 @@ then
     )
 fi
 
-if [[ $AUTO_TEST == "Jenkins" ]]
-then
-    GCC_VERSION=12.3.0
-    TEXT="Installing gcc==$GCC_VERSION"
-    # Upgrades from 11.2.0 to 12.3.0 on GCE Jenkins (Ubuntu 20) (2024-06-11)
-    start_step "$TEXT"
-    conda install -y $QUIET -c conda-forge gcc==$GCC_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
-    end_step "$TEXT"
-fi
+# Dropping this: 2026-11-23
+# if [[ $AUTO_TEST == "Jenkins" ]]
+# then
+#     GCC_VERSION=12.3.0
+#     TEXT="Installing gcc==$GCC_VERSION"
+#     # Upgrades from 11.2.0 to 12.3.0 on GCE Jenkins (Ubuntu 20) (2024-06-11)
+#     start_step "$TEXT"
+#     conda install -y $QUIET -c conda-forge gcc==$GCC_VERSION >> "$EMEWS_INSTALL_LOG" 2>&1 || on_error "$TEXT" "$EMEWS_INSTALL_LOG"
+#     end_step "$TEXT"
+# fi
 
 conda-list 4
 
