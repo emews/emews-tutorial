@@ -4,6 +4,9 @@ set -eu
 # JENKINS INSTALL SH
 # Runs install_emews.sh
 
+PS4="
++ "
+
 DATE_FMT_NICE="%D{%Y-%m-%d} %D{%H:%M:%S}"
 log()
 # General-purpose log line
